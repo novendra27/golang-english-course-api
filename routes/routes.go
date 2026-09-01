@@ -41,16 +41,22 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	studentRepo := repositories.NewStudentRepository(db)
 	courseRepo := repositories.NewCourseRepository(db)
 	classRepo := repositories.NewClassRepository(db)
+	registrationRepo := repositories.NewRegistrationRepository(db)
+	paymentRepo := repositories.NewPaymentRepository(db)
 
 	// 4. Inisialisasi Services
 	studentService := services.NewStudentService(studentRepo)
 	courseService := services.NewCourseService(courseRepo)
 	classService := services.NewClassService(classRepo, courseRepo)
+	registrationService := services.NewRegistrationService(registrationRepo, studentRepo, courseRepo)
+	paymentService := services.NewPaymentService(paymentRepo)
 
 	// 5. Inisialisasi Handlers
 	studentHandler := handlers.NewStudentHandler(studentService)
 	courseHandler := handlers.NewCourseHandler(courseService)
 	classHandler := handlers.NewClassHandler(classService)
+	registrationHandler := handlers.NewRegistrationHandler(registrationService)
+	paymentHandler := handlers.NewPaymentHandler(paymentService)
 
 	// 6. API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -70,6 +76,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			students.GET("/:id", studentHandler.GetByID)
 			students.PUT("/:id", studentHandler.Update)
 			students.DELETE("/:id", studentHandler.Delete)
+			students.GET("/:id/registrations", registrationHandler.GetByStudentID)
 		}
 
 		// --- Course Endpoints ---
@@ -80,6 +87,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			courses.GET("/:id", courseHandler.GetByID)
 			courses.PUT("/:id", courseHandler.Update)
 			courses.DELETE("/:id", courseHandler.Delete)
+			courses.GET("/:id/registrations", registrationHandler.GetByCourseID)
 		}
 
 		// --- Class Endpoints ---
@@ -91,6 +99,23 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			classes.PUT("/:id", classHandler.Update)
 			classes.DELETE("/:id", classHandler.Delete)
 			classes.GET("/:id/students", classHandler.GetStudents)
+		}
+
+		// --- Registration Endpoints ---
+		registrations := apiV1.Group("/registrations")
+		{
+			registrations.POST("", registrationHandler.Register)
+			registrations.GET("", registrationHandler.GetAll)
+			registrations.GET("/:id", registrationHandler.GetByID)
+			registrations.PUT("/:id/cancel", registrationHandler.CancelRegistration)
+		}
+
+		// --- Payment Endpoints ---
+		payments := apiV1.Group("/payments")
+		{
+			payments.GET("", paymentHandler.GetAll)
+			payments.GET("/:id", paymentHandler.GetByID)
+			payments.POST("/:id/pay", paymentHandler.Pay)
 		}
 	}
 
