@@ -43,6 +43,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	classRepo := repositories.NewClassRepository(db)
 	registrationRepo := repositories.NewRegistrationRepository(db)
 	paymentRepo := repositories.NewPaymentRepository(db)
+	placementRepo := repositories.NewClassPlacementRepository(db)
 
 	// 4. Inisialisasi Services
 	studentService := services.NewStudentService(studentRepo)
@@ -50,6 +51,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	classService := services.NewClassService(classRepo, courseRepo)
 	registrationService := services.NewRegistrationService(registrationRepo, studentRepo, courseRepo)
 	paymentService := services.NewPaymentService(paymentRepo)
+	placementService := services.NewClassPlacementService(placementRepo, registrationRepo, classRepo)
 
 	// 5. Inisialisasi Handlers
 	studentHandler := handlers.NewStudentHandler(studentService)
@@ -57,6 +59,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	classHandler := handlers.NewClassHandler(classService)
 	registrationHandler := handlers.NewRegistrationHandler(registrationService)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
+	placementHandler := handlers.NewClassPlacementHandler(placementService)
 
 	// 6. API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -116,6 +119,14 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			payments.GET("", paymentHandler.GetAll)
 			payments.GET("/:id", paymentHandler.GetByID)
 			payments.POST("/:id/pay", paymentHandler.Pay)
+		}
+
+		// --- Class Placement Endpoints ---
+		placements := apiV1.Group("/class-placements")
+		{
+			placements.POST("", placementHandler.PlaceStudent)
+			placements.GET("", placementHandler.GetAll)
+			placements.GET("/:id", placementHandler.GetByID)
 		}
 	}
 
