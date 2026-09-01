@@ -37,6 +37,11 @@ func main() {
 		log.Error().Err(err).Msg("Database connection warning (pastikan PostgreSQL service sedang berjalan)")
 	} else {
 		defer config.CloseDB(db)
+
+		// 4. Auto-Migration skema 6 domain model
+		if err := config.AutoMigrate(db); err != nil {
+			log.Fatal().Err(err).Msg("Gagal melakukan auto-migration database")
+		}
 	}
 
 	log.Info().Msg("Aplikasi siap melanjutkan ke fase berikutnya! ✨")

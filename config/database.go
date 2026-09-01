@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"english-course-api/models"
+
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -60,6 +62,26 @@ func ConnectDB(cfg *Config) (*gorm.DB, error) {
 		Msg("Berhasil terhubung ke database PostgreSQL ✅")
 
 	return db, nil
+}
+
+// AutoMigrate menjalankan migrasi skema tabel secara otomatis untuk seluruh domain models
+func AutoMigrate(db *gorm.DB) error {
+	log.Info().Msg("Menjalankan database auto-migration...")
+
+	err := db.AutoMigrate(
+		&models.Student{},
+		&models.Course{},
+		&models.Class{},
+		&models.Registration{},
+		&models.Payment{},
+		&models.ClassPlacement{},
+	)
+	if err != nil {
+		return fmt.Errorf("gagal melakukan auto-migration database: %w", err)
+	}
+
+	log.Info().Msg("Database auto-migration berhasil diselesaikan ✅")
+	return nil
 }
 
 // CloseDB menutup koneksi database secara graceful
