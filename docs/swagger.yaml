@@ -1,0 +1,1299 @@
+basePath: /api/v1
+definitions:
+  models.Class:
+    properties:
+      capacity:
+        type: integer
+      course:
+        $ref: '#/definitions/models.Course'
+      course_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        description: 'Contoh: "Basic English A"'
+        type: string
+      schedule:
+        description: 'Contoh: "Senin & Rabu, 19:00 - 21:00"'
+        type: string
+      status:
+        description: '''open'', ''full'', ''closed'''
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ClassPlacement:
+    properties:
+      class:
+        $ref: '#/definitions/models.Class'
+      class_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      placement_date:
+        type: string
+      registration:
+        $ref: '#/definitions/models.Registration'
+      registration_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Course:
+    properties:
+      classes:
+        items:
+          $ref: '#/definitions/models.Class'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        description: 'Contoh: "3 Bulan", "48 Jam"'
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      status:
+        description: '''active'', ''inactive'''
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Payment:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: integer
+      payment_date:
+        type: string
+      payment_method:
+        description: '''bank_transfer'', ''ewallet'', ''credit_card'''
+        type: string
+      registration:
+        $ref: '#/definitions/models.Registration'
+      registration_id:
+        type: integer
+      status:
+        description: '''pending'', ''paid'', ''failed'', ''refunded'''
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Registration:
+    properties:
+      class_placement:
+        $ref: '#/definitions/models.ClassPlacement'
+      course:
+        $ref: '#/definitions/models.Course'
+      course_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      payment:
+        $ref: '#/definitions/models.Payment'
+      registration_date:
+        type: string
+      status:
+        description: '''pending'', ''registered'', ''cancelled'', ''completed'''
+        type: string
+      student:
+        $ref: '#/definitions/models.Student'
+      student_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Student:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  services.CreateClassPlacementRequest:
+    properties:
+      class_id:
+        type: integer
+      registration_id:
+        type: integer
+    required:
+    - class_id
+    - registration_id
+    type: object
+  services.CreateClassRequest:
+    properties:
+      capacity:
+        type: integer
+      course_id:
+        type: integer
+      name:
+        type: string
+      schedule:
+        type: string
+      status:
+        description: '''open'', ''full'', ''closed'''
+        type: string
+    required:
+    - capacity
+    - course_id
+    - name
+    - schedule
+    type: object
+  services.CreateCourseRequest:
+    properties:
+      description:
+        type: string
+      duration:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      status:
+        description: 'default: ''active'''
+        type: string
+    required:
+    - duration
+    - name
+    - price
+    type: object
+  services.CreateRegistrationRequest:
+    properties:
+      course_id:
+        type: integer
+      student_id:
+        type: integer
+    required:
+    - course_id
+    - student_id
+    type: object
+  services.CreateStudentRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - phone
+    type: object
+  services.ProcessPaymentRequest:
+    properties:
+      amount:
+        type: number
+      payment_method:
+        description: e.g. "bank_transfer", "ewallet", "credit_card"
+        type: string
+    required:
+    - amount
+    - payment_method
+    type: object
+  services.UpdateClassRequest:
+    properties:
+      capacity:
+        type: integer
+      course_id:
+        type: integer
+      name:
+        type: string
+      schedule:
+        type: string
+      status:
+        type: string
+    required:
+    - capacity
+    - course_id
+    - name
+    - schedule
+    - status
+    type: object
+  services.UpdateCourseRequest:
+    properties:
+      description:
+        type: string
+      duration:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      status:
+        type: string
+    required:
+    - duration
+    - name
+    - price
+    - status
+    type: object
+  services.UpdateStudentRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - phone
+    type: object
+  utils.APIResponse:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@englishcourse.com
+    name: Novendra
+  description: RESTful API backend untuk pendaftaran kursus bahasa Inggris dengan
+    clean layered architecture.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: English Course Registration API
+  version: "1.0"
+paths:
+  /class-placements:
+    get:
+      description: Mengembalikan daftar penempatan siswa beserta relasi registration,
+        student, course, dan class
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ClassPlacement'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil seluruh data penempatan kelas
+      tags:
+      - Class Placements
+    post:
+      consumes:
+      - application/json
+      description: Menempatkan siswa yang pendaftarannya sudah lunas ('registered')
+        ke dalam kelas dengan validasi kapasitas dan kesesuaian course
+      parameters:
+      - description: Payload penempatan kelas
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateClassPlacementRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassPlacement'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Menempatkan siswa ke dalam kelas
+      tags:
+      - Class Placements
+  /class-placements/{id}:
+    get:
+      description: Mengembalikan data spesifik penempatan kelas berdasarkan ID
+      parameters:
+      - description: Placement ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassPlacement'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil detail penempatan kelas
+      tags:
+      - Class Placements
+  /classes:
+    get:
+      description: Mengembalikan seluruh kelas beserta data Course-nya
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Class'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil daftar seluruh kelas
+      tags:
+      - Classes
+    post:
+      consumes:
+      - application/json
+      description: Membuka kelas baru dengan jadwal dan kapasitas tertentu
+      parameters:
+      - description: Payload data kelas
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateClassRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Membuat kelas baru di bawah course
+      tags:
+      - Classes
+  /classes/{id}:
+    delete:
+      description: Menghapus kelas berdasarkan ID
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Menghapus data kelas
+      tags:
+      - Classes
+    get:
+      description: Mengembalikan data spesifik kelas berdasarkan ID
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil detail kelas
+      tags:
+      - Classes
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui nama, kapasitas, jadwal, atau status kelas
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payload update class
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateClassRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengubah data kelas
+      tags:
+      - Classes
+  /classes/{id}/students:
+    get:
+      description: Mengembalikan seluruh siswa yang telah ditempatkan di kelas ini
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Student'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil daftar siswa dalam kelas
+      tags:
+      - Classes
+  /courses:
+    get:
+      description: Mengembalikan katalog semua kursus bahasa Inggris yang tersedia
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Course'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil daftar seluruh course
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan paket kursus baru beserta harga dan durasi
+      parameters:
+      - description: Payload data course
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Membuat katalog course baru
+      tags:
+      - Courses
+  /courses/{id}:
+    delete:
+      description: Menghapus course berdasarkan ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Menghapus data course
+      tags:
+      - Courses
+    get:
+      description: Mengembalikan detail spesifik course beserta kelas yang dibuka
+        di bawahnya
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil detail course beserta daftar kelasnya
+      tags:
+      - Courses
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui nama, deskripsi, harga, durasi, atau status course
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payload update course
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengubah data course
+      tags:
+      - Courses
+  /courses/{id}/registrations:
+    get:
+      description: Mengembalikan semua siswa yang terdaftar di course tertentu
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Registration'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil daftar pendaftaran pada course
+      tags:
+      - Courses
+  /payments:
+    get:
+      description: Mengembalikan daftar semua data transaksi payment
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Payment'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil seluruh tagihan pembayaran
+      tags:
+      - Payments
+  /payments/{id}:
+    get:
+      description: Mengembalikan informasi tagihan payment berdasarkan ID
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil detail tagihan pembayaran
+      tags:
+      - Payments
+  /payments/{id}/pay:
+    post:
+      consumes:
+      - application/json
+      description: Melakukan pembayaran tagihan dan secara atomik mengubah status
+        registrasi menjadi 'registered'
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payload pembayaran
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.ProcessPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Memproses simulasi pembayaran tagihan
+      tags:
+      - Payments
+  /registrations:
+    get:
+      description: Mengembalikan semua data registrasi beserta relasi student, course,
+        dan payment
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Registration'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil daftar seluruh pendaftaran
+      tags:
+      - Registrations
+    post:
+      consumes:
+      - application/json
+      description: Mendaftarkan siswa ke kursus dan secara otomatis membuat tagihan
+        Payment pending
+      parameters:
+      - description: Payload pendaftaran
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Registration'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mendaftar ke kursus (Registration)
+      tags:
+      - Registrations
+  /registrations/{id}:
+    get:
+      description: Mengembalikan detail registrasi berdasarkan ID
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Registration'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil detail pendaftaran
+      tags:
+      - Registrations
+  /registrations/{id}/cancel:
+    put:
+      description: Mengubah status registrasi menjadi cancelled jika belum selesai
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Membatalkan pendaftaran
+      tags:
+      - Registrations
+  /students:
+    get:
+      description: Mengembalikan daftar semua peserta kursus yang terdaftar
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Student'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil daftar seluruh student
+      tags:
+      - Students
+    post:
+      consumes:
+      - application/json
+      description: Membuat data peserta kursus baru dengan validasi email unik
+      parameters:
+      - description: Payload pendaftaran student
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateStudentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Student'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mendaftarkan student baru
+      tags:
+      - Students
+  /students/{id}:
+    delete:
+      description: Menghapus data student berdasarkan ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Menghapus data student
+      tags:
+      - Students
+    get:
+      description: Mengembalikan data detail student berdasarkan ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Student'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil detail profil student
+      tags:
+      - Students
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui nama, email, atau no telepon student
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payload update student
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateStudentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Student'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengubah data profil student
+      tags:
+      - Students
+  /students/{id}/registrations:
+    get:
+      description: Mengembalikan daftar kursus yang didaftarkan oleh student tertentu
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Registration'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Mengambil riwayat pendaftaran student
+      tags:
+      - Students
+swagger: "2.0"

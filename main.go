@@ -11,6 +11,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// @title           English Course Registration API
+// @version         1.0
+// @description     RESTful API backend untuk pendaftaran kursus bahasa Inggris dengan clean layered architecture.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Novendra
+// @contact.email  support@englishcourse.com
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
 func main() {
 	// 1. Setup Zerolog (Pretty output untuk console)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
@@ -52,6 +65,7 @@ func main() {
 	// 6. Jalankan HTTP Server (Blocking Listener)
 	serverAddr := fmt.Sprintf(":%s", cfg.App.Port)
 	log.Info().Msgf("HTTP Server aktif dan mendengarkan pada http://localhost%s 🌐", serverAddr)
+	log.Info().Msgf("Swagger UI tersedia di: http://localhost%s/swagger/index.html 📑", serverAddr)
 
 	if err := router.Run(serverAddr); err != nil {
 		log.Fatal().Err(err).Msg("Gagal menjalankan HTTP server")

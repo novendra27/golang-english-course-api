@@ -19,7 +19,14 @@ func NewPaymentHandler(service services.PaymentService) *PaymentHandler {
 	return &PaymentHandler{service: service}
 }
 
-// GetAll godoc: GET /api/v1/payments
+// GetAll godoc
+// @Summary      Mengambil seluruh tagihan pembayaran
+// @Description  Mengembalikan daftar semua data transaksi payment
+// @Tags         Payments
+// @Produce      json
+// @Success      200  {object}  utils.APIResponse{data=[]models.Payment}
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /payments [get]
 func (h *PaymentHandler) GetAll(c *gin.Context) {
 	payments, err := h.service.GetAll()
 	if err != nil {
@@ -30,7 +37,17 @@ func (h *PaymentHandler) GetAll(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Daftar tagihan pembayaran berhasil diambil", payments)
 }
 
-// GetByID godoc: GET /api/v1/payments/:id
+// GetByID godoc
+// @Summary      Mengambil detail tagihan pembayaran
+// @Description  Mengembalikan informasi tagihan payment berdasarkan ID
+// @Tags         Payments
+// @Produce      json
+// @Param        id   path      int  true  "Payment ID"
+// @Success      200  {object}  utils.APIResponse{data=models.Payment}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /payments/{id} [get]
 func (h *PaymentHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -52,7 +69,20 @@ func (h *PaymentHandler) GetByID(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Detail pembayaran berhasil diambil", payment)
 }
 
-// Pay godoc: POST /api/v1/payments/:id/pay
+// Pay godoc
+// @Summary      Memproses simulasi pembayaran tagihan
+// @Description  Melakukan pembayaran tagihan dan secara atomik mengubah status registrasi menjadi 'registered'
+// @Tags         Payments
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                           true  "Payment ID"
+// @Param        request  body      services.ProcessPaymentRequest true  "Payload pembayaran"
+// @Success      200  {object}  utils.APIResponse{data=models.Payment}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      422  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /payments/{id}/pay [post]
 func (h *PaymentHandler) Pay(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)

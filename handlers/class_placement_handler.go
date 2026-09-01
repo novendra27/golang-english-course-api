@@ -19,7 +19,20 @@ func NewClassPlacementHandler(service services.ClassPlacementService) *ClassPlac
 	return &ClassPlacementHandler{service: service}
 }
 
-// PlaceStudent godoc: POST /api/v1/class-placements
+// PlaceStudent godoc
+// @Summary      Menempatkan siswa ke dalam kelas
+// @Description  Menempatkan siswa yang pendaftarannya sudah lunas ('registered') ke dalam kelas dengan validasi kapasitas dan kesesuaian course
+// @Tags         Class Placements
+// @Accept       json
+// @Produce      json
+// @Param        request body services.CreateClassPlacementRequest true "Payload penempatan kelas"
+// @Success      201  {object}  utils.APIResponse{data=models.ClassPlacement}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      409  {object}  utils.APIResponse
+// @Failure      422  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /class-placements [post]
 func (h *ClassPlacementHandler) PlaceStudent(c *gin.Context) {
 	var req services.CreateClassPlacementRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -50,7 +63,14 @@ func (h *ClassPlacementHandler) PlaceStudent(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusCreated, "Student berhasil ditempatkan ke dalam kelas 🎉", placement)
 }
 
-// GetAll godoc: GET /api/v1/class-placements
+// GetAll godoc
+// @Summary      Mengambil seluruh data penempatan kelas
+// @Description  Mengembalikan daftar penempatan siswa beserta relasi registration, student, course, dan class
+// @Tags         Class Placements
+// @Produce      json
+// @Success      200  {object}  utils.APIResponse{data=[]models.ClassPlacement}
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /class-placements [get]
 func (h *ClassPlacementHandler) GetAll(c *gin.Context) {
 	placements, err := h.service.GetAll()
 	if err != nil {
@@ -61,7 +81,17 @@ func (h *ClassPlacementHandler) GetAll(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Daftar penempatan kelas berhasil diambil", placements)
 }
 
-// GetByID godoc: GET /api/v1/class-placements/:id
+// GetByID godoc
+// @Summary      Mengambil detail penempatan kelas
+// @Description  Mengembalikan data spesifik penempatan kelas berdasarkan ID
+// @Tags         Class Placements
+// @Produce      json
+// @Param        id   path      int  true  "Placement ID"
+// @Success      200  {object}  utils.APIResponse{data=models.ClassPlacement}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /class-placements/{id} [get]
 func (h *ClassPlacementHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)

@@ -19,7 +19,20 @@ func NewRegistrationHandler(service services.RegistrationService) *RegistrationH
 	return &RegistrationHandler{service: service}
 }
 
-// Register godoc: POST /api/v1/registrations
+// Register godoc
+// @Summary      Mendaftar ke kursus (Registration)
+// @Description  Mendaftarkan siswa ke kursus dan secara otomatis membuat tagihan Payment pending
+// @Tags         Registrations
+// @Accept       json
+// @Produce      json
+// @Param        request body services.CreateRegistrationRequest true "Payload pendaftaran"
+// @Success      201  {object}  utils.APIResponse{data=models.Registration}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      409  {object}  utils.APIResponse
+// @Failure      422  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /registrations [post]
 func (h *RegistrationHandler) Register(c *gin.Context) {
 	var req services.CreateRegistrationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -48,7 +61,14 @@ func (h *RegistrationHandler) Register(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusCreated, "Pendaftaran kursus berhasil dibuat", registration)
 }
 
-// GetAll godoc: GET /api/v1/registrations
+// GetAll godoc
+// @Summary      Mengambil daftar seluruh pendaftaran
+// @Description  Mengembalikan semua data registrasi beserta relasi student, course, dan payment
+// @Tags         Registrations
+// @Produce      json
+// @Success      200  {object}  utils.APIResponse{data=[]models.Registration}
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /registrations [get]
 func (h *RegistrationHandler) GetAll(c *gin.Context) {
 	registrations, err := h.service.GetAll()
 	if err != nil {
@@ -59,7 +79,17 @@ func (h *RegistrationHandler) GetAll(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Daftar pendaftaran berhasil diambil", registrations)
 }
 
-// GetByID godoc: GET /api/v1/registrations/:id
+// GetByID godoc
+// @Summary      Mengambil detail pendaftaran
+// @Description  Mengembalikan detail registrasi berdasarkan ID
+// @Tags         Registrations
+// @Produce      json
+// @Param        id   path      int  true  "Registration ID"
+// @Success      200  {object}  utils.APIResponse{data=models.Registration}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /registrations/{id} [get]
 func (h *RegistrationHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -81,7 +111,17 @@ func (h *RegistrationHandler) GetByID(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Detail pendaftaran berhasil diambil", reg)
 }
 
-// GetByStudentID godoc: GET /api/v1/students/:id/registrations
+// GetByStudentID godoc
+// @Summary      Mengambil riwayat pendaftaran student
+// @Description  Mengembalikan daftar kursus yang didaftarkan oleh student tertentu
+// @Tags         Students
+// @Produce      json
+// @Param        id   path      int  true  "Student ID"
+// @Success      200  {object}  utils.APIResponse{data=[]models.Registration}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /students/{id}/registrations [get]
 func (h *RegistrationHandler) GetByStudentID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -103,7 +143,17 @@ func (h *RegistrationHandler) GetByStudentID(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Daftar pendaftaran student berhasil diambil", regs)
 }
 
-// GetByCourseID godoc: GET /api/v1/courses/:id/registrations
+// GetByCourseID godoc
+// @Summary      Mengambil daftar pendaftaran pada course
+// @Description  Mengembalikan semua siswa yang terdaftar di course tertentu
+// @Tags         Courses
+// @Produce      json
+// @Param        id   path      int  true  "Course ID"
+// @Success      200  {object}  utils.APIResponse{data=[]models.Registration}
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /courses/{id}/registrations [get]
 func (h *RegistrationHandler) GetByCourseID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
@@ -125,7 +175,17 @@ func (h *RegistrationHandler) GetByCourseID(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Daftar pendaftaran course berhasil diambil", regs)
 }
 
-// CancelRegistration godoc: PUT /api/v1/registrations/:id/cancel
+// CancelRegistration godoc
+// @Summary      Membatalkan pendaftaran
+// @Description  Mengubah status registrasi menjadi cancelled jika belum selesai
+// @Tags         Registrations
+// @Produce      json
+// @Param        id   path      int  true  "Registration ID"
+// @Success      200  {object}  utils.APIResponse
+// @Failure      400  {object}  utils.APIResponse
+// @Failure      404  {object}  utils.APIResponse
+// @Failure      500  {object}  utils.APIResponse
+// @Router       /registrations/{id}/cancel [put]
 func (h *RegistrationHandler) CancelRegistration(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)

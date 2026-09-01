@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"english-course-api/config"
+	_ "english-course-api/docs"
 	"english-course-api/handlers"
 	"english-course-api/middleware"
 	"english-course-api/repositories"
@@ -11,6 +12,8 @@ import (
 	"english-course-api/utils"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
@@ -37,7 +40,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		})
 	})
 
-	// 3. Inisialisasi Repositories
+	// 3. Swagger UI Endpoint
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// 4. Inisialisasi Repositories
 	studentRepo := repositories.NewStudentRepository(db)
 	courseRepo := repositories.NewCourseRepository(db)
 	classRepo := repositories.NewClassRepository(db)
@@ -45,7 +51,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	paymentRepo := repositories.NewPaymentRepository(db)
 	placementRepo := repositories.NewClassPlacementRepository(db)
 
-	// 4. Inisialisasi Services
+	// 5. Inisialisasi Services
 	studentService := services.NewStudentService(studentRepo)
 	courseService := services.NewCourseService(courseRepo)
 	classService := services.NewClassService(classRepo, courseRepo)
@@ -53,7 +59,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	paymentService := services.NewPaymentService(paymentRepo)
 	placementService := services.NewClassPlacementService(placementRepo, registrationRepo, classRepo)
 
-	// 5. Inisialisasi Handlers
+	// 6. Inisialisasi Handlers
 	studentHandler := handlers.NewStudentHandler(studentService)
 	courseHandler := handlers.NewCourseHandler(courseService)
 	classHandler := handlers.NewClassHandler(classService)
@@ -61,7 +67,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 	placementHandler := handlers.NewClassPlacementHandler(placementService)
 
-	// 6. API v1 Router Group
+	// 7. API v1 Router Group
 	apiV1 := r.Group("/api/v1")
 	{
 		apiV1.GET("/health", func(c *gin.Context) {
