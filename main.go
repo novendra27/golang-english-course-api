@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"english-course-api/config"
+	"english-course-api/routes"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -44,5 +46,14 @@ func main() {
 		}
 	}
 
-	log.Info().Msg("Aplikasi siap melanjutkan ke fase berikutnya! ✨")
+	// 5. Inisialisasi Router Gin & Middleware
+	router := routes.SetupRouter(db, cfg)
+
+	// 6. Jalankan HTTP Server (Blocking Listener)
+	serverAddr := fmt.Sprintf(":%s", cfg.App.Port)
+	log.Info().Msgf("HTTP Server aktif dan mendengarkan pada http://localhost%s 🌐", serverAddr)
+
+	if err := router.Run(serverAddr); err != nil {
+		log.Fatal().Err(err).Msg("Gagal menjalankan HTTP server")
+	}
 }
