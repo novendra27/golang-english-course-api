@@ -16,7 +16,6 @@ import (
 
 // SetupRouter menginisialisasi Gin Engine, middleware, dependency injection, dan mendaftarkan route endpoint
 func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
-	// Atur mode Gin
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
@@ -38,16 +37,22 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		})
 	})
 
-	// 3. Inisialisasi Repositories, Services, dan Handlers (Dependency Injection)
+	// 3. Inisialisasi Repositories
 	studentRepo := repositories.NewStudentRepository(db)
-	studentService := services.NewStudentService(studentRepo)
-	studentHandler := handlers.NewStudentHandler(studentService)
-
 	courseRepo := repositories.NewCourseRepository(db)
-	courseService := services.NewCourseService(courseRepo)
-	courseHandler := handlers.NewCourseHandler(courseService)
+	classRepo := repositories.NewClassRepository(db)
 
-	// 4. API v1 Router Group
+	// 4. Inisialisasi Services
+	studentService := services.NewStudentService(studentRepo)
+	courseService := services.NewCourseService(courseRepo)
+	classService := services.NewClassService(classRepo, courseRepo)
+
+	// 5. Inisialisasi Handlers
+	studentHandler := handlers.NewStudentHandler(studentService)
+	courseHandler := handlers.NewCourseHandler(courseService)
+	classHandler := handlers.NewClassHandler(classService)
+
+	// 6. API v1 Router Group
 	apiV1 := r.Group("/api/v1")
 	{
 		apiV1.GET("/health", func(c *gin.Context) {
@@ -75,6 +80,17 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			courses.GET("/:id", courseHandler.GetByID)
 			courses.PUT("/:id", courseHandler.Update)
 			courses.DELETE("/:id", courseHandler.Delete)
+		}
+
+		// --- Class Endpoints ---
+		classes := apiV1.Group("/classes")
+		{
+			classes.POST("", classHandler.Create)
+			classes.GET("", classHandler.GetAll)
+			classes.GET("/:id", classHandler.GetByID)
+			classes.PUT("/:id", classHandler.Update)
+			classes.DELETE("/:id", classHandler.Delete)
+			classes.GET("/:id/students", classHandler.GetStudents)
 		}
 	}
 
