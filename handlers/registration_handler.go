@@ -23,7 +23,7 @@ func NewRegistrationHandler(service services.RegistrationService) *RegistrationH
 func (h *RegistrationHandler) Register(c *gin.Context) {
 	var req services.CreateRegistrationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Payload request tidak valid", err.Error())
+		utils.ValidationErrorResponse(c, err)
 		return
 	}
 

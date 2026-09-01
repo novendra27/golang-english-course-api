@@ -63,7 +63,7 @@ func (h *PaymentHandler) Pay(c *gin.Context) {
 
 	var req services.ProcessPaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Payload request tidak valid", err.Error())
+		utils.ValidationErrorResponse(c, err)
 		return
 	}
 

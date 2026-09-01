@@ -23,7 +23,7 @@ func NewClassPlacementHandler(service services.ClassPlacementService) *ClassPlac
 func (h *ClassPlacementHandler) PlaceStudent(c *gin.Context) {
 	var req services.CreateClassPlacementRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Payload request tidak valid", err.Error())
+		utils.ValidationErrorResponse(c, err)
 		return
 	}
 

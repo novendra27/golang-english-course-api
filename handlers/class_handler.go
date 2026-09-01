@@ -23,7 +23,7 @@ func NewClassHandler(service services.ClassService) *ClassHandler {
 func (h *ClassHandler) Create(c *gin.Context) {
 	var req services.CreateClassRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Payload request tidak valid", err.Error())
+		utils.ValidationErrorResponse(c, err)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *ClassHandler) Update(c *gin.Context) {
 
 	var req services.UpdateClassRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Payload request tidak valid", err.Error())
+		utils.ValidationErrorResponse(c, err)
 		return
 	}
 

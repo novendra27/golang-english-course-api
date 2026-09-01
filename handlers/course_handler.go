@@ -23,7 +23,7 @@ func NewCourseHandler(service services.CourseService) *CourseHandler {
 func (h *CourseHandler) Create(c *gin.Context) {
 	var req services.CreateCourseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Payload request tidak valid", err.Error())
+		utils.ValidationErrorResponse(c, err)
 		return
 	}
 
@@ -80,7 +80,7 @@ func (h *CourseHandler) Update(c *gin.Context) {
 
 	var req services.UpdateCourseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Payload request tidak valid", err.Error())
+		utils.ValidationErrorResponse(c, err)
 		return
 	}
 
