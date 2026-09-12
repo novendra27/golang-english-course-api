@@ -25,14 +25,14 @@ const docTemplate = `{
     "paths": {
         "/class-placements": {
             "get": {
-                "description": "Mengembalikan daftar penempatan siswa beserta relasi registration, student, course, dan class",
+                "description": "Returns all class placement records along with registration, student, course, and class relations",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Class Placements"
                 ],
-                "summary": "Mengambil seluruh data penempatan kelas",
+                "summary": "Get all class placements",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -64,7 +64,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Menempatkan siswa yang pendaftarannya sudah lunas ('registered') ke dalam kelas dengan validasi kapasitas dan kesesuaian course",
+                "description": "Places a student with paid registration ('registered') into a class with capacity and course matching validation",
                 "consumes": [
                     "application/json"
                 ],
@@ -74,10 +74,10 @@ const docTemplate = `{
                 "tags": [
                     "Class Placements"
                 ],
-                "summary": "Menempatkan siswa ke dalam kelas",
+                "summary": "Place student into class",
                 "parameters": [
                     {
-                        "description": "Payload penempatan kelas",
+                        "description": "Class placement payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -140,14 +140,14 @@ const docTemplate = `{
         },
         "/class-placements/{id}": {
             "get": {
-                "description": "Mengembalikan data spesifik penempatan kelas berdasarkan ID",
+                "description": "Returns detail of a specific class placement by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Class Placements"
                 ],
-                "summary": "Mengambil detail penempatan kelas",
+                "summary": "Get class placement detail",
                 "parameters": [
                     {
                         "type": "integer",
@@ -199,14 +199,14 @@ const docTemplate = `{
         },
         "/classes": {
             "get": {
-                "description": "Mengembalikan seluruh kelas beserta data Course-nya",
+                "description": "Returns all classes along with their Course data",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Classes"
                 ],
-                "summary": "Mengambil daftar seluruh kelas",
+                "summary": "Get all classes",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -238,7 +238,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Membuka kelas baru dengan jadwal dan kapasitas tertentu",
+                "description": "Opens a new class under a course with schedule and capacity",
                 "consumes": [
                     "application/json"
                 ],
@@ -248,10 +248,10 @@ const docTemplate = `{
                 "tags": [
                     "Classes"
                 ],
-                "summary": "Membuat kelas baru di bawah course",
+                "summary": "Create a new class",
                 "parameters": [
                     {
-                        "description": "Payload data kelas",
+                        "description": "Class creation payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -308,14 +308,14 @@ const docTemplate = `{
         },
         "/classes/{id}": {
             "get": {
-                "description": "Mengembalikan data spesifik kelas berdasarkan ID",
+                "description": "Returns detail of a specific class by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Classes"
                 ],
-                "summary": "Mengambil detail kelas",
+                "summary": "Get class detail",
                 "parameters": [
                     {
                         "type": "integer",
@@ -365,7 +365,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Memperbarui nama, kapasitas, jadwal, atau status kelas",
+                "description": "Updates name, capacity, schedule, or status of a class",
                 "consumes": [
                     "application/json"
                 ],
@@ -375,7 +375,7 @@ const docTemplate = `{
                 "tags": [
                     "Classes"
                 ],
-                "summary": "Mengubah data kelas",
+                "summary": "Update class data",
                 "parameters": [
                     {
                         "type": "integer",
@@ -385,7 +385,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Payload update class",
+                        "description": "Update class payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -440,14 +440,14 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Menghapus kelas berdasarkan ID",
+                "description": "Deletes a class by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Classes"
                 ],
-                "summary": "Menghapus data kelas",
+                "summary": "Delete class data",
                 "parameters": [
                     {
                         "type": "integer",
@@ -487,14 +487,14 @@ const docTemplate = `{
         },
         "/classes/{id}/students": {
             "get": {
-                "description": "Mengembalikan seluruh siswa yang telah ditempatkan di kelas ini",
+                "description": "Returns all students who have been placed into this class",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Classes"
                 ],
-                "summary": "Mengambil daftar siswa dalam kelas",
+                "summary": "Get students in a class",
                 "parameters": [
                     {
                         "type": "integer",
@@ -549,14 +549,14 @@ const docTemplate = `{
         },
         "/courses": {
             "get": {
-                "description": "Mengembalikan katalog semua kursus bahasa Inggris yang tersedia",
+                "description": "Returns a catalog of all available English courses",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Mengambil daftar seluruh course",
+                "summary": "Get all courses",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -588,7 +588,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Menambahkan paket kursus baru beserta harga dan durasi",
+                "description": "Creates a new course catalog package with price and duration",
                 "consumes": [
                     "application/json"
                 ],
@@ -598,10 +598,10 @@ const docTemplate = `{
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Membuat katalog course baru",
+                "summary": "Create a new course",
                 "parameters": [
                     {
-                        "description": "Payload data course",
+                        "description": "Course creation payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -652,14 +652,14 @@ const docTemplate = `{
         },
         "/courses/{id}": {
             "get": {
-                "description": "Mengembalikan detail spesifik course beserta kelas yang dibuka di bawahnya",
+                "description": "Returns detail of a specific course along with open classes under it",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Mengambil detail course beserta daftar kelasnya",
+                "summary": "Get course detail with classes",
                 "parameters": [
                     {
                         "type": "integer",
@@ -709,7 +709,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Memperbarui nama, deskripsi, harga, durasi, atau status course",
+                "description": "Updates name, description, price, duration, or status of a course",
                 "consumes": [
                     "application/json"
                 ],
@@ -719,7 +719,7 @@ const docTemplate = `{
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Mengubah data course",
+                "summary": "Update course data",
                 "parameters": [
                     {
                         "type": "integer",
@@ -729,7 +729,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Payload update course",
+                        "description": "Update course payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -784,14 +784,14 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Menghapus course berdasarkan ID",
+                "description": "Deletes a course by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Menghapus data course",
+                "summary": "Delete course data",
                 "parameters": [
                     {
                         "type": "integer",
@@ -831,14 +831,14 @@ const docTemplate = `{
         },
         "/courses/{id}/registrations": {
             "get": {
-                "description": "Mengembalikan semua siswa yang terdaftar di course tertentu",
+                "description": "Returns all students registered for a specific course",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Mengambil daftar pendaftaran pada course",
+                "summary": "Get registrations for a course",
                 "parameters": [
                     {
                         "type": "integer",
@@ -893,14 +893,14 @@ const docTemplate = `{
         },
         "/payments": {
             "get": {
-                "description": "Mengembalikan daftar semua data transaksi payment",
+                "description": "Returns a list of all payment transaction records",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Payments"
                 ],
-                "summary": "Mengambil seluruh tagihan pembayaran",
+                "summary": "Get all payment invoices",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -934,14 +934,14 @@ const docTemplate = `{
         },
         "/payments/{id}": {
             "get": {
-                "description": "Mengembalikan informasi tagihan payment berdasarkan ID",
+                "description": "Returns information of a specific payment invoice by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Payments"
                 ],
-                "summary": "Mengambil detail tagihan pembayaran",
+                "summary": "Get payment invoice detail",
                 "parameters": [
                     {
                         "type": "integer",
@@ -993,7 +993,7 @@ const docTemplate = `{
         },
         "/payments/{id}/pay": {
             "post": {
-                "description": "Melakukan pembayaran tagihan dan secara atomik mengubah status registrasi menjadi 'registered'",
+                "description": "Processes payment settlement and atomically transitions registration status to 'registered'",
                 "consumes": [
                     "application/json"
                 ],
@@ -1003,7 +1003,7 @@ const docTemplate = `{
                 "tags": [
                     "Payments"
                 ],
-                "summary": "Memproses simulasi pembayaran tagihan",
+                "summary": "Process simulated payment",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1013,7 +1013,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Payload pembayaran",
+                        "description": "Payment processing payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1070,14 +1070,14 @@ const docTemplate = `{
         },
         "/registrations": {
             "get": {
-                "description": "Mengembalikan semua data registrasi beserta relasi student, course, dan payment",
+                "description": "Returns all registration records along with student, course, and payment relations",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Registrations"
                 ],
-                "summary": "Mengambil daftar seluruh pendaftaran",
+                "summary": "Get all registrations",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1109,7 +1109,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Mendaftarkan siswa ke kursus dan secara otomatis membuat tagihan Payment pending",
+                "description": "Registers a student to a course and automatically generates a pending payment invoice",
                 "consumes": [
                     "application/json"
                 ],
@@ -1119,10 +1119,10 @@ const docTemplate = `{
                 "tags": [
                     "Registrations"
                 ],
-                "summary": "Mendaftar ke kursus (Registration)",
+                "summary": "Register to a course",
                 "parameters": [
                     {
-                        "description": "Payload pendaftaran",
+                        "description": "Registration payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1185,14 +1185,14 @@ const docTemplate = `{
         },
         "/registrations/{id}": {
             "get": {
-                "description": "Mengembalikan detail registrasi berdasarkan ID",
+                "description": "Returns detail of a registration by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Registrations"
                 ],
-                "summary": "Mengambil detail pendaftaran",
+                "summary": "Get registration detail",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1244,14 +1244,14 @@ const docTemplate = `{
         },
         "/registrations/{id}/cancel": {
             "put": {
-                "description": "Mengubah status registrasi menjadi cancelled jika belum selesai",
+                "description": "Updates registration status to cancelled if not yet completed",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Registrations"
                 ],
-                "summary": "Membatalkan pendaftaran",
+                "summary": "Cancel a registration",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1291,14 +1291,14 @@ const docTemplate = `{
         },
         "/students": {
             "get": {
-                "description": "Mengembalikan daftar semua peserta kursus yang terdaftar",
+                "description": "Returns a list of all registered students",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Students"
                 ],
-                "summary": "Mengambil daftar seluruh student",
+                "summary": "Get all students",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1330,7 +1330,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Membuat data peserta kursus baru dengan validasi email unik",
+                "description": "Creates a new student profile with unique email validation",
                 "consumes": [
                     "application/json"
                 ],
@@ -1340,10 +1340,10 @@ const docTemplate = `{
                 "tags": [
                     "Students"
                 ],
-                "summary": "Mendaftarkan student baru",
+                "summary": "Register a new student",
                 "parameters": [
                     {
-                        "description": "Payload pendaftaran student",
+                        "description": "Student registration payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1400,14 +1400,14 @@ const docTemplate = `{
         },
         "/students/{id}": {
             "get": {
-                "description": "Mengembalikan data detail student berdasarkan ID",
+                "description": "Returns detail of a student by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Students"
                 ],
-                "summary": "Mengambil detail profil student",
+                "summary": "Get student profile detail",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1457,7 +1457,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Memperbarui nama, email, atau no telepon student",
+                "description": "Updates name, email, or phone number of a student",
                 "consumes": [
                     "application/json"
                 ],
@@ -1467,7 +1467,7 @@ const docTemplate = `{
                 "tags": [
                     "Students"
                 ],
-                "summary": "Mengubah data profil student",
+                "summary": "Update student profile",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1477,7 +1477,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Payload update student",
+                        "description": "Update student payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1538,14 +1538,14 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Menghapus data student berdasarkan ID",
+                "description": "Deletes student data by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Students"
                 ],
-                "summary": "Menghapus data student",
+                "summary": "Delete student data",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1585,14 +1585,14 @@ const docTemplate = `{
         },
         "/students/{id}/registrations": {
             "get": {
-                "description": "Mengembalikan daftar kursus yang didaftarkan oleh student tertentu",
+                "description": "Returns all registrations made by a specific student",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Students"
                 ],
-                "summary": "Mengambil riwayat pendaftaran student",
+                "summary": "Get student registration history",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2059,7 +2059,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "English Course Registration API",
-	Description:      "RESTful API backend untuk pendaftaran kursus bahasa Inggris dengan clean layered architecture.",
+	Description:      "RESTful API backend for English course registration with clean layered architecture and dynamic i18n support.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

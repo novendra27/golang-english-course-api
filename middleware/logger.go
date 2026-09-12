@@ -1,3 +1,4 @@
+// Package middleware provides custom Gin middlewares for logging and localization.
 package middleware
 
 import (
@@ -7,14 +8,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// HTTPLogger adalah middleware Gin untuk mencatat structured log setiap request masuk menggunakan Zerolog
+// HTTPLogger is a Gin middleware that records structured Zerolog logs for every incoming HTTP request.
 func HTTPLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
 		raw := c.Request.URL.RawQuery
 
-		// Proses request ke handler berikutnya
+		// Process downstream handlers
 		c.Next()
 
 		latency := time.Since(start)
@@ -45,3 +46,4 @@ func HTTPLogger() gin.HandlerFunc {
 			Msg("HTTP Request")
 	}
 }
+

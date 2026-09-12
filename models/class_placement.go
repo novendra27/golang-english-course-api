@@ -1,10 +1,11 @@
+// Package models defines the database domain models and GORM schema mapping.
 package models
 
 import (
 	"time"
 )
 
-// ClassPlacement merepresentasikan penempatan student ke kelas tertentu setelah pembayaran valid
+// ClassPlacement represents the class assignment of a student with a verified/paid registration.
 type ClassPlacement struct {
 	ID             uint          `gorm:"primaryKey;autoIncrement" json:"id"`
 	RegistrationID uint          `gorm:"not null;uniqueIndex" json:"registration_id"`
@@ -15,3 +16,4 @@ type ClassPlacement struct {
 	CreatedAt      time.Time     `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt      time.Time     `gorm:"autoUpdateTime" json:"updated_at"`
 }
+

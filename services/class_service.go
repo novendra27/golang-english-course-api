@@ -1,3 +1,4 @@
+// Package services implements the core business logic and state machine workflows.
 package services
 
 import (
@@ -29,7 +30,7 @@ type UpdateClassRequest struct {
 	Status   string `json:"status" binding:"required"`
 }
 
-// ClassService interface
+// ClassService defines the business logic operations for Class management.
 type ClassService interface {
 	Create(req CreateClassRequest) (*models.Class, error)
 	GetAll() ([]models.Class, error)
@@ -44,7 +45,7 @@ type classService struct {
 	courseRepo repositories.CourseRepository
 }
 
-// NewClassService membuat instance baru ClassService
+// NewClassService creates a new ClassService instance.
 func NewClassService(classRepo repositories.ClassRepository, courseRepo repositories.CourseRepository) ClassService {
 	return &classService{
 		classRepo:  classRepo,
@@ -53,7 +54,7 @@ func NewClassService(classRepo repositories.ClassRepository, courseRepo reposito
 }
 
 func (s *classService) Create(req CreateClassRequest) (*models.Class, error) {
-	// 1. Validasi keberadaan Course
+	// 1. Validate existence of Course
 	course, err := s.courseRepo.FindByID(req.CourseID)
 	if err != nil {
 		return nil, err
@@ -79,7 +80,7 @@ func (s *classService) Create(req CreateClassRequest) (*models.Class, error) {
 		return nil, err
 	}
 
-	// Attach course object ke response
+	// Attach course relation for response
 	class.Course = course
 	return class, nil
 }
@@ -108,7 +109,7 @@ func (s *classService) Update(id uint, req UpdateClassRequest) (*models.Class, e
 		return nil, ErrClassNotFound
 	}
 
-	// Validasi CourseID jika diubah
+	// Validate CourseID if updated
 	if req.CourseID != class.CourseID {
 		course, err := s.courseRepo.FindByID(req.CourseID)
 		if err != nil {
@@ -152,6 +153,6 @@ func (s *classService) GetStudents(classID uint) ([]models.Student, error) {
 	if class == nil {
 		return nil, ErrClassNotFound
 	}
-
 	return s.classRepo.GetStudentsByClassID(classID)
 }
+

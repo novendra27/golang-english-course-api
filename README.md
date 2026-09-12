@@ -1,254 +1,334 @@
 # 🚀 English Course Registration API
 
-RESTful API backend untuk sistem pendaftaran kursus bahasa Inggris yang dibangun menggunakan **Go (Golang)** dengan arsitektur modular berlapis (*Clean Layered Architecture*), **Gin Framework**, **GORM ORM**, **PostgreSQL Database**, **Zerolog Structured Logging**, dan **Docker Containerization**.
+[![Go Version](https://img.shields.io/badge/Go-1.22%20%7C%201.26-00ADD8?style=flat&logo=go)](https://golang.org)
+[![Gin Framework](https://img.shields.io/badge/Framework-Gin%20v1.12-008ECF?style=flat&logo=gin)](https://gin-gonic.com)
+[![GORM](https://img.shields.io/badge/ORM-GORM%20v1.31-7952B3?style=flat)](https://gorm.io)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%2016-336791?style=flat&logo=postgresql)](https://www.postgresql.org)
+[![Zerolog](https://img.shields.io/badge/Logging-Zerolog-brightgreen?style=flat)](https://github.com/rs/zerolog)
+[![i18n](https://img.shields.io/badge/Localization-go--i18n%20(EN%20%2F%20ID)-blue?style=flat)](https://github.com/nicksnyder/go-i18n)
+[![Swagger](https://img.shields.io/badge/API%20Docs-Swagger%202.0-85EA2D?style=flat&logo=swagger)](http://localhost:8080/swagger/index.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> [!NOTE]
+> 📖 **Bahasa Indonesia:** Tersedia dokumentasi dalam Bahasa Indonesia di [README.id.md](file:///d:/Code%20Learning/Learn%20Project/Golang%20Project/english-course-api/README.id.md).
+
+A production-grade RESTful API backend for an English Course Registration and Class Placement management system. Built with **Go (Golang)** following clean **Layered Architecture** (*Separation of Concerns*), featuring **Dynamic i18n Localization**, strict transactional state management, automated unit tests, and full Docker containerization.
 
 ---
 
-## 📑 Daftar Isi
+## 📑 Table of Contents
 
-- [Tech Stack & Technologies](#-tech-stack--technologies)
-- [Arsitektur & Struktur Folder](#-arsitektur--struktur-folder)
-- [Alur Bisnis Utama (Core Workflow)](#-alur-bisnis-utama-core-workflow)
-- [Panduan Menjalankan Aplikasi](#-panduan-menjalankan-aplikasi)
-- [Automated Unit Testing](#-automated-unit-testing)
-- [Format Standar Response API](#-format-standar-response-api)
-- [Dokumentasi Lengkap API & Contoh Request](#-dokumentasi-lengkap-api--contoh-request)
-  - [1. Health Checks](#1-health-check-endpoints)
-  - [2. Modul Student](#2-modul-student-peserta-kursus)
-  - [3. Modul Course](#3-modul-course-katalog-kursus)
-  - [4. Modul Class](#4-modul-class-kelas-kursus)
-  - [5. Modul Course Registration](#5-modul-course-registration-pendaftaran)
-  - [6. Modul Payment (Simulasi Pembayaran)](#6-modul-payment-simulasi-pembayaran)
-  - [7. Modul Class Placement (Penempatan Kelas)](#7-modul-class-placement-penempatan-kelas)
+- [Key Features](#-key-features)
+- [Tech Stack](#%EF%B8%8F-tech-stack)
+- [System Architecture & Directory Structure](#-system-architecture--directory-structure)
+- [Business Workflow & State Machine](#-business-workflow--state-machine)
+- [Dynamic Localization (i18n)](#-dynamic-localization-i18n)
+- [Getting Started](#-getting-started)
+  - [Option 1: Docker Compose (Recommended)](#option-1-docker-compose-recommended)
+  - [Option 2: Direct Local Go Execution](#option-2-direct-local-go-execution)
+- [5-Minute Quick Tour (End-to-End API Walkthrough)](#-5-minute-quick-tour-end-to-end-api-walkthrough)
+- [Environment Configuration](#-environment-configuration)
+- [Automated Testing](#-automated-testing)
+- [API Documentation & Endpoints](#-api-documentation--endpoints)
+  - [Interactive Swagger UI](#interactive-swagger-ui)
+  - [Standard JSON API Response Format](#standard-json-api-response-format)
+  - [Endpoints Overview](#endpoints-overview)
+- [License](#-license)
 
 ---
 
-## 🛠️ Tech Stack & Technologies
+## 🌟 Key Features
 
-| Komponen | Teknologi | Keterangan |
+- **Clean Layered Architecture:** Strict decoupled boundaries between Handler $\rightarrow$ Service $\rightarrow$ Repository $\rightarrow$ Database.
+- **Transactional State Machine:** Course Registration, Atomic Payment Settlement, and Capacity-Guarded Class Placement.
+- **Dynamic Localization Engine (i18n):** Embedded bilingual dictionaries (`EN` & `ID`) supporting runtime switching via query parameter (`?lang=`) or HTTP header (`Accept-Language`).
+- **Data Integrity & Validation:** Field-level struct validation via `validator/v10` with human-readable localized error messages.
+- **High-Performance Observability:** Structured JSON request logging powered by `Zerolog` with latency, IP, and status tracing.
+- **Interactive OpenAPI / Swagger Documentation:** Live Swagger 2.0 UI embedded for frictionless API testing.
+- **Zero-Dependency Production Builds:** Multi-stage Docker containerization ready for cloud deployments.
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology | Description |
 | :--- | :--- | :--- |
-| **Language** | Go (Golang `1.22+` / `1.26+`) | Strongly-typed, performa tinggi, native concurrency. |
-| **Web Framework** | [Gin Web Framework](https://github.com/gin-gonic/gin) | HTTP router cepat, JSON binding, middleware pipeline. |
-| **ORM** | [GORM](https://gorm.io) | Relational mapping, query builder, database transaction. |
-| **Database** | PostgreSQL 16 | Relational database dengan constraint & foreign key. |
-| **Logging** | [Zerolog](https://github.com/rs/zerolog) | High-performance structured JSON logger. |
-| **Validation** | Validator v10 | Struct tag validation dengan human-readable error formatter. |
-| **Env Loader** | [godotenv](https://github.com/joho/godotenv) | Environment variable reader dari file `.env`. |
-| **DevOps** | Docker & Docker Compose | Multi-stage build containerization. |
+| **Language** | Go `1.22+` / `1.26+` | High performance, strict type safety, native concurrency. |
+| **Web Framework** | [Gin Web Framework](https://github.com/gin-gonic/gin) | Fast HTTP routing, middleware chaining, JSON binding. |
+| **ORM** | [GORM](https://gorm.io) | Schema migration, relation preloading, ACID transactions. |
+| **Database** | PostgreSQL 16 | Relational data persistence with strict foreign key constraints. |
+| **Localization** | [go-i18n v2](https://github.com/nicksnyder/go-i18n) | Dynamic runtime translation with embedded JSON files. |
+| **Logging** | [Zerolog](https://github.com/rs/zerolog) | Blazing-fast zero-allocation JSON structured logger. |
+| **Validation** | Go Playground Validator v10 | Struct validation tags with multi-language error parsing. |
+| **API Docs** | [Swaggo / Swagger 2.0](https://github.com/swaggo/swag) | Declarative Swagger documentation generator & Swagger UI. |
+| **DevOps** | Docker & Docker Compose | Multi-stage scratch/alpine build container orchestration. |
 
 ---
 
-## 📐 Arsitektur & Struktur Folder
-
-Project menerapkan pola **Layered Architecture** (*Separation of Concerns*):
+## 📐 System Architecture & Directory Structure
 
 ```text
 english-course-api/
-├── config/             # Inisialisasi database GORM & load environment .env
+├── config/             # Config loader (.env) & PostgreSQL connection pool setup
 │   ├── config.go
 │   └── database.go
-├── models/             # Definisi struct entitas domain & GORM tags
-│   ├── student.go
-│   ├── course.go
-│   ├── class.go
-│   ├── registration.go
-│   ├── payment.go
-│   └── class_placement.go
-├── repositories/       # Layer akses database murni via GORM
-│   ├── student_repository.go
-│   ├── course_repository.go
-│   ├── class_repository.go
-│   ├── registration_repository.go
-│   ├── payment_repository.go
-│   └── class_placement_repository.go
-├── services/           # Layer logika bisnis, validasi aturan & transaksi DB
-│   ├── student_service.go
-│   ├── course_service.go
-│   ├── class_service.go
-│   ├── registration_service.go
-│   ├── payment_service.go
-│   └── class_placement_service.go
-├── handlers/           # Layer HTTP controller (JSON binding & status code)
+├── docs/               # Auto-generated Swagger 2.0 specs (docs.go, swagger.json, swagger.yaml)
+├── handlers/           # HTTP controllers: request parsing, DTO binding, status responses
 │   ├── student_handler.go
 │   ├── course_handler.go
 │   ├── class_handler.go
 │   ├── registration_handler.go
 │   ├── payment_handler.go
 │   └── class_placement_handler.go
-├── routes/             # Pendaftaran router Gin & dependency injection
+├── locales/            # Embedded translation dictionaries (//go:embed *.json)
+│   ├── locales.go
+│   ├── en.json
+│   └── id.json
+├── middleware/         # Gin middleware pipeline (Zerolog HTTP logger, i18n detection)
+│   ├── logger.go
+│   └── i18n.go
+├── models/             # Domain entities & GORM relational models
+│   ├── student.go
+│   ├── course.go
+│   ├── class.go
+│   ├── registration.go
+│   ├── payment.go
+│   └── class_placement.go
+├── repositories/       # Data Access Layer: direct GORM queries and transactions
+│   ├── student_repository.go
+│   ├── course_repository.go
+│   ├── class_repository.go
+│   ├── registration_repository.go
+│   ├── payment_repository.go
+│   └── class_placement_repository.go
+├── routes/             # Dependency injection wiring & Gin router endpoint group setup
 │   └── routes.go
-├── middleware/         # HTTP Middleware (Zerolog request logger, recovery)
-│   └── logger.go
-├── utils/              # Helper JSON response & validation error formatter
+├── services/           # Business Logic Layer: state validations, transaction coordination
+│   ├── student_service.go
+│   ├── course_service.go
+│   ├── class_service.go
+│   ├── registration_service.go
+│   ├── registration_service_test.go
+│   ├── payment_service.go
+│   ├── class_placement_service.go
+│   └── class_placement_service_test.go
+├── utils/              # Standard JSON API response helper & i18n translation engine
+│   ├── i18n.go
+│   ├── i18n_test.go
 │   └── response.go
-├── Dockerfile          # Multi-stage Docker build
-├── docker-compose.yml  # Orkestrasi container PostgreSQL & Go API
-├── .env.example        # Template konfigurasi environment
+├── Dockerfile          # Multi-stage container build definition
+├── docker-compose.yml  # PostgreSQL & Go API orchestration
+├── .env.example        # Environment variable configuration template
 ├── go.mod / go.sum     # Go dependency management
-└── main.go             # Entrypoint aplikasi
+└── main.go             # Application bootstrap & entrypoint
 ```
 
 ---
 
-## 🔄 Alur Bisnis Utama (Core Workflow)
+## 🔄 Business Workflow & State Machine
 
 ```text
 Student + Course ──► Registration (Status: pending)
                             │
                             ▼
                     Payment (Status: pending ──► paid)
-                            │ (pembayaran lunas)
+                            │ (Invoice settled)
                             ▼
-               Class Placement (Assign ke Class)
+                Class Placement (Assigned to Class)
                             │
                             ▼
-           Class (Status: open ──► full jika kapasitas tercapai)
+            Class (Status: open ──► full when capacity reached)
 ```
 
-### 📋 Aturan Bisnis Kunci:
-1. **Validasi Email Unik:** Setiap siswa harus memiliki alamat email unik di database.
-2. **Pencegahan Pendaftaran Ganda:** Siswa tidak dapat mendaftar course yang sama jika masih memiliki registrasi berstatus aktif (`pending` / `registered`).
-3. **Pembayaran Wajib:** Saat registrasi dibuat, tagihan `Payment` otomatis terbentuk secara atomik. Siswa **hanya bisa ditempatkan ke kelas jika status registrasinya sudah `registered`** (artinya tagihan `Payment` berstatus `paid`).
-4. **Course Matching:** Siswa hanya bisa masuk ke kelas yang sesuai dengan course yang didaftarkan.
-5. **Proteksi Kapasitas Kelas:** Penempatan siswa ditolak jika kapasitas kelas (`Capacity`) telah terpenuhi.
+### 📋 Core Business Rules:
+1. **Unique Email Enforcement:** Each student record must contain a unique email address.
+2. **Duplicate Registration Prevention:** A student cannot register for the same course if an active registration (`pending` or `registered`) exists.
+3. **Atomic Billing:** When a registration is submitted, a linked `Payment` invoice is created atomically.
+4. **Payment Gate:** A student **can only be assigned to a class if their registration status is `registered`** (meaning the invoice is `paid`).
+5. **Course Matching:** The class selected for placement must match the exact course of the student's registration.
+6. **Class Capacity Guard:** Placements are rejected if the target class is `closed` or has reached its maximum seat `capacity`. When filled, the class status transitions to `full`.
 
 ---
 
-## 🚀 Panduan Menjalankan Aplikasi
+## 🌐 Dynamic Localization (i18n)
 
-### Opsi 1: Menggunakan Docker Compose (Direkomendasikan)
-Pastikan Docker Desktop aktif di komputer Anda:
+The API dynamically resolves response messages and validation errors based on client preference:
+- **Default Language:** English (`en`)
+- **Supported Locales:** `en` (English), `id` (Indonesian)
 
-```powershell
-# 1. Build dan jalankan seluruh container di background
+### How to specify the language:
+1. **Query Parameter (Highest priority):**
+   ```bash
+   GET /api/v1/courses?lang=id
+   ```
+2. **HTTP Request Header:**
+   ```bash
+   Accept-Language: id-ID,id;q=0.9,en;q=0.8
+   ```
+
+---
+
+## 🚀 Getting Started
+
+### Option 1: Docker Compose (Recommended)
+
+Run both the PostgreSQL database and the API container seamlessly:
+
+```bash
+# 1. Build and start containers in the background
 docker compose up --build -d
 
-# 2. Melihat log aplikasi secara realtime
+# 2. Follow live structured application logs
 docker compose logs -f app
 
-# 3. Menghentikan container
+# 3. Stop containers
 docker compose down
 ```
-- API Server: `http://localhost:8080`
-- PostgreSQL: `localhost:5432`
 
-### Opsi 2: Menjalankan Secara Lokal (Direct Go)
-1. Salin template environment:
-   ```powershell
+- **API Base URL:** `http://localhost:8080/api/v1`
+- **Swagger UI:** `http://localhost:8080/swagger/index.html`
+- **Health Check:** `http://localhost:8080/health`
+
+---
+
+### Option 2: Direct Local Go Execution
+
+#### Prerequisites:
+- Go `1.22+` installed
+- PostgreSQL `14+` running locally
+
+#### Steps:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/novendra27/golang-english-course-api.git
+   cd golang-english-course-api
+   ```
+2. **Setup environment variables:**
+   ```bash
+   # Linux/macOS
+   cp .env.example .env
+
+   # Windows PowerShell
    copy .env.example .env
    ```
-2. Pastikan database PostgreSQL lokal aktif sesuai konfigurasi `.env`.
-3. Jalankan aplikasi:
-   ```powershell
+3. **Run database migrations & start server:**
+   ```bash
    go run main.go
    ```
 
 ---
 
-## 🧪 Automated Unit Testing
+## ⚡ 5-Minute Quick Tour (End-to-End API Walkthrough)
 
-Project dilengkapi dengan automated unit testing untuk layer Service:
+Experience the complete lifecycle of student registration, invoice settlement, and class placement in under 5 minutes using these sequential `curl` commands:
 
-```powershell
-# Menjalankan seluruh unit test
-go test -v ./services/...
-```
-
----
-
-## 📦 Format Standar Response API
-
-Seluruh endpoint menghasilkan format JSON response yang konsisten:
-
-### Response Sukses (200 OK / 201 Created):
-```json
-{
-  "success": true,
-  "message": "Pesan deskriptif keberhasilan",
-  "data": {}
-}
-```
-
-### Response Error Validasi (422 Unprocessable Entity):
-```json
-{
-  "success": false,
-  "message": "Validasi request gagal",
-  "errors": {
-    "Email": "Field 'Email' harus berupa alamat email yang valid",
-    "Name": "Field 'Name' wajib diisi"
-  }
-}
-```
-
-### Response Error Bisnis / Konflik (400 Bad Request / 409 Conflict / 404 Not Found):
-```json
-{
-  "success": false,
-  "message": "student masih memiliki pendaftaran aktif untuk course ini",
-  "errors": null
-}
-```
-
----
-
-## 📚 Dokumentasi Lengkap API & Contoh Request
-
-Base URL: `http://localhost:8080/api/v1`
-
----
-
-### 1. Health Check Endpoints
-
-#### `GET /health` & `GET /api/v1/health`
-Mengecek status ketersediaan server dan API.
-
-**Contoh Request (cURL):**
-```bash
-curl -X GET http://localhost:8080/api/v1/health
-```
-
-**Contoh Response (`200 OK`):**
-```json
-{
-  "success": true,
-  "message": "API v1 is healthy 🚀",
-  "data": {
-    "status": "UP",
-    "version": "v1"
-  }
-}
-```
-
----
-
-### 2. Modul Student (Peserta Kursus)
-
-| Method | Endpoint | Deskripsi |
-| :--- | :--- | :--- |
-| `POST` | `/api/v1/students` | Mendaftarkan student baru |
-| `GET` | `/api/v1/students` | Mengambil seluruh data student |
-| `GET` | `/api/v1/students/:id` | Mengambil detail student |
-| `PUT` | `/api/v1/students/:id` | Mengubah data student |
-| `DELETE` | `/api/v1/students/:id` | Menghapus data student |
-| `GET` | `/api/v1/students/:id/registrations` | Mengambil riwayat pendaftaran student |
-
-#### 🔹 Create Student (`POST /api/v1/students`)
+### Step 1: Register a Student
 ```bash
 curl -X POST http://localhost:8080/api/v1/students \
   -H "Content-Type: application/json" \
-  -d '{
-    "name": "Budi Santoso",
-    "email": "budi.santoso@example.com",
-    "phone": "081234567890"
-  }'
+  -d '{"name": "Alex Johnson", "email": "alex@example.com", "phone": "081234567890"}'
+```
+> **Result:** Creates Student record (ID: `1`).
+
+### Step 2: Create Course & Open Class Section
+```bash
+# 2a. Create Course
+curl -X POST http://localhost:8080/api/v1/courses \
+  -H "Content-Type: application/json" \
+  -d '{"name": "IELTS Masterclass", "description": "Intensive IELTS band 7.5+ prep", "price": 1250000, "duration": "2 Months", "status": "active"}'
+
+# 2b. Open Class Section (Capacity: 15)
+curl -X POST http://localhost:8080/api/v1/classes \
+  -H "Content-Type: application/json" \
+  -d '{"course_id": 1, "name": "IELTS Weekend Intensive", "capacity": 15, "schedule": "Sat & Sun, 10:00 - 13:00", "status": "open"}'
+```
+> **Result:** Creates Course (ID: `1`) and Class (ID: `1`).
+
+### Step 3: Enroll Student into Course (Generates Invoice)
+```bash
+curl -X POST http://localhost:8080/api/v1/registrations \
+  -H "Content-Type: application/json" \
+  -d '{"student_id": 1, "course_id": 1}'
+```
+> **State Machine:** Registration created with status `pending` and linked Payment ID `1` (Amount: `1250000`).
+
+### Step 4: Settle Payment Invoice
+```bash
+curl -X POST http://localhost:8080/api/v1/payments/1/pay \
+  -H "Content-Type: application/json" \
+  -d '{"payment_method": "bank_transfer", "amount": 1250000}'
+```
+> **State Machine:** Payment status transitions to `paid` $\rightarrow$ Registration status automatically unlocks to `registered` 🎉.
+
+### Step 5: Assign Student to Class Section
+```bash
+curl -X POST http://localhost:8080/api/v1/class-placements \
+  -H "Content-Type: application/json" \
+  -d '{"registration_id": 1, "class_id": 1}'
+```
+> **Business Rule Check:** System verifies course alignment and capacity before assigning.
+
+### Step 6: Test Dynamic Localization (i18n)
+```bash
+# 6a. Default English response
+curl -X GET http://localhost:8080/api/v1/courses/1
+
+# 6b. Indonesian localized response via query parameter
+curl -X GET "http://localhost:8080/api/v1/courses/1?lang=id"
 ```
 
-**Response (`201 Created`):**
+
+---
+
+## ⚙️ Environment Configuration
+
+Configuration is loaded from `.env` using `godotenv`:
+
+| Key | Default | Description |
+| :--- | :--- | :--- |
+| `APP_NAME` | `english-course-api` | Name identifier for application logs |
+| `APP_ENV` | `development` | Environment mode (`development` / `production`) |
+| `APP_PORT` | `8080` | HTTP port listener |
+| `DB_HOST` | `localhost` | PostgreSQL host address |
+| `DB_PORT` | `5432` | PostgreSQL port |
+| `DB_USER` | `postgres` | Database username |
+| `DB_PASSWORD`| `postgres` | Database password |
+| `DB_NAME` | `english_course_db`| Database name |
+| `DB_SSLMODE` | `disable` | PostgreSQL SSL connection mode |
+| `DB_TIMEZONE`| `Asia/Jakarta` | Database session timezone |
+| `LOG_LEVEL` | `debug` | Zerolog log level (`debug`, `info`, `warn`, `error`) |
+| `LOG_PRETTY` | `true` | Enable colorized pretty console log output |
+
+---
+
+## 🧪 Automated Testing
+
+Execute all unit test suites across service business logic and the i18n translation engine:
+
+```bash
+# Run all tests with verbose output
+go test -v ./...
+```
+
+---
+
+## 📚 API Documentation & Endpoints
+
+### Interactive Swagger UI
+Access the interactive API documentation and test endpoints directly from your browser:
+🔗 **[http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)**
+
+---
+
+### Standard JSON API Response Format
+
+All endpoints return a uniform response envelope:
+
+#### Success Response (`200 OK` / `201 Created`):
 ```json
 {
   "success": true,
-  "message": "Student berhasil dibuat",
+  "message": "Student created successfully",
   "data": {
     "id": 1,
     "name": "Budi Santoso",
@@ -260,303 +340,91 @@ curl -X POST http://localhost:8080/api/v1/students \
 }
 ```
 
-#### 🔹 Update Student (`PUT /api/v1/students/:id`)
-```bash
-curl -X PUT http://localhost:8080/api/v1/students/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Budi Santoso, S.Kom",
-    "email": "budi.santoso@example.com",
-    "phone": "081299999999"
-  }'
+#### Localized Validation Error (`422 Unprocessable Entity`):
+```json
+{
+  "success": false,
+  "message": "Request validation failed",
+  "errors": {
+    "Email": "The Email field must be a valid email address",
+    "Name": "The Name field is required"
+  }
+}
+```
+
+#### Business Conflict / Error Response (`409 Conflict` / `400 Bad Request`):
+```json
+{
+  "success": false,
+  "message": "Student already has an active registration for this course",
+  "errors": null
+}
 ```
 
 ---
 
-### 3. Modul Course (Katalog Kursus)
+### Endpoints Overview
 
-| Method | Endpoint | Deskripsi |
+#### 1. System Health Checks
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/v1/courses` | Membuat kursus baru |
-| `GET` | `/api/v1/courses` | Mengambil seluruh kursus |
-| `GET` | `/api/v1/courses/:id` | Mengambil detail kursus beserta daftar kelasnya |
-| `PUT` | `/api/v1/courses/:id` | Mengubah data kursus |
-| `DELETE` | `/api/v1/courses/:id` | Menghapus kursus |
-| `GET` | `/api/v1/courses/:id/registrations` | Mengambil daftar registrasi pada kursus |
+| `GET` | `/health` | Root application health check |
+| `GET` | `/api/v1/health` | API v1 subsystem health check |
 
-#### 🔹 Create Course (`POST /api/v1/courses`)
-```bash
-curl -X POST http://localhost:8080/api/v1/courses \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Basic English",
-    "description": "Dasar grammar dan conversation untuk pemula",
-    "price": 750000,
-    "duration": "3 Bulan",
-    "status": "active"
-  }'
-```
-
-**Response (`201 Created`):**
-```json
-{
-  "success": true,
-  "message": "Course berhasil dibuat",
-  "data": {
-    "id": 1,
-    "name": "Basic English",
-    "description": "Dasar grammar dan conversation untuk pemula",
-    "price": 750000,
-    "duration": "3 Bulan",
-    "status": "active",
-    "created_at": "2026-09-01T08:00:00Z",
-    "updated_at": "2026-09-01T08:00:00Z"
-  }
-}
-```
-
-#### 🔹 Get Course Detail with Preloaded Classes (`GET /api/v1/courses/1`)
-```bash
-curl -X GET http://localhost:8080/api/v1/courses/1
-```
-
-**Response (`200 OK`):**
-```json
-{
-  "success": true,
-  "message": "Detail course berhasil diambil",
-  "data": {
-    "id": 1,
-    "name": "Basic English",
-    "description": "Dasar grammar dan conversation untuk pemula",
-    "price": 750000,
-    "duration": "3 Bulan",
-    "status": "active",
-    "classes": [
-      {
-        "id": 1,
-        "course_id": 1,
-        "name": "Basic English Pagi",
-        "capacity": 15,
-        "schedule": "Senin & Rabu, 09:00 - 11:00",
-        "status": "open"
-      }
-    ]
-  }
-}
-```
-
----
-
-### 4. Modul Class (Kelas Kursus)
-
-| Method | Endpoint | Deskripsi |
+#### 2. Student Module
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/v1/classes` | Membuat kelas di bawah kursus tertentu |
-| `GET` | `/api/v1/classes` | Mengambil seluruh kelas beserta Course |
-| `GET` | `/api/v1/classes/:id` | Mengambil detail kelas |
-| `PUT` | `/api/v1/classes/:id` | Mengubah jadwal/kapasitas kelas |
-| `DELETE` | `/api/v1/classes/:id` | Menghapus kelas |
-| `GET` | `/api/v1/classes/:id/students` | Mengambil daftar siswa yang terdaftar di kelas |
+| `POST` | `/api/v1/students` | Register a new student profile |
+| `GET` | `/api/v1/students` | Fetch all registered students |
+| `GET` | `/api/v1/students/:id` | Fetch student details by ID |
+| `PUT` | `/api/v1/students/:id` | Update student profile |
+| `DELETE` | `/api/v1/students/:id` | Delete student profile |
+| `GET` | `/api/v1/students/:id/registrations` | Fetch student registration history |
 
-#### 🔹 Create Class (`POST /api/v1/classes`)
-```bash
-curl -X POST http://localhost:8080/api/v1/classes \
-  -H "Content-Type: application/json" \
-  -d '{
-    "course_id": 1,
-    "name": "Basic English Pagi",
-    "capacity": 15,
-    "schedule": "Senin & Rabu, 09:00 - 11:00",
-    "status": "open"
-  }'
-```
-
-**Response (`201 Created`):**
-```json
-{
-  "success": true,
-  "message": "Class berhasil dibuat",
-  "data": {
-    "id": 1,
-    "course_id": 1,
-    "name": "Basic English Pagi",
-    "capacity": 15,
-    "schedule": "Senin & Rabu, 09:00 - 11:00",
-    "status": "open",
-    "course": {
-      "id": 1,
-      "name": "Basic English",
-      "price": 750000
-    }
-  }
-}
-```
-
----
-
-### 5. Modul Course Registration (Pendaftaran)
-
-| Method | Endpoint | Deskripsi |
+#### 3. Course Module
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/v1/registrations` | Mendaftarkan siswa ke kursus (otomatis buat payment) |
-| `GET` | `/api/v1/registrations` | Mengambil seluruh data registrasi |
-| `GET` | `/api/v1/registrations/:id` | Mengambil detail registrasi beserta status payment |
-| `PUT` | `/api/v1/registrations/:id/cancel` | Membatalkan pendaftaran |
+| `POST` | `/api/v1/courses` | Create a new course offering |
+| `GET` | `/api/v1/courses` | Fetch all available courses |
+| `GET` | `/api/v1/courses/:id` | Fetch course detail with preloaded classes |
+| `PUT` | `/api/v1/courses/:id` | Update course details |
+| `DELETE` | `/api/v1/courses/:id` | Delete course |
+| `GET` | `/api/v1/courses/:id/registrations` | Fetch all course enrollments |
 
-#### 🔹 Create Registration (`POST /api/v1/registrations`)
-```bash
-curl -X POST http://localhost:8080/api/v1/registrations \
-  -H "Content-Type: application/json" \
-  -d '{
-    "student_id": 1,
-    "course_id": 1
-  }'
-```
-
-**Response (`201 Created`):**
-```json
-{
-  "success": true,
-  "message": "Pendaftaran kursus berhasil dibuat",
-  "data": {
-    "id": 1,
-    "student_id": 1,
-    "course_id": 1,
-    "registration_date": "2026-09-01T08:30:00Z",
-    "status": "pending",
-    "student": {
-      "id": 1,
-      "name": "Budi Santoso"
-    },
-    "course": {
-      "id": 1,
-      "name": "Basic English",
-      "price": 750000
-    },
-    "payment": {
-      "id": 1,
-      "registration_id": 1,
-      "amount": 750000,
-      "payment_method": "pending",
-      "status": "pending"
-    }
-  }
-}
-```
-
----
-
-### 6. Modul Payment (Simulasi Pembayaran)
-
-| Method | Endpoint | Deskripsi |
+#### 4. Class Module
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/v1/payments` | Mengambil daftar seluruh tagihan pembayaran |
-| `GET` | `/api/v1/payments/:id` | Mengambil detail tagihan pembayaran |
-| `POST` | `/api/v1/payments/:id/pay` | Memproses pembayaran (mengubah status ke `paid`) |
+| `POST` | `/api/v1/classes` | Create a class section under a course |
+| `GET` | `/api/v1/classes` | Fetch all classes with course relations |
+| `GET` | `/api/v1/classes/:id` | Fetch class details by ID |
+| `PUT` | `/api/v1/classes/:id` | Update class schedule or capacity |
+| `DELETE` | `/api/v1/classes/:id` | Delete class |
+| `GET` | `/api/v1/classes/:id/students` | List all enrolled students in a class |
 
-#### 🔹 Process Payment (`POST /api/v1/payments/:id/pay`)
-```bash
-curl -X POST http://localhost:8080/api/v1/payments/1/pay \
-  -H "Content-Type: application/json" \
-  -d '{
-    "payment_method": "bank_transfer",
-    "amount": 750000
-  }'
-```
-
-**Response (`200 OK`):**
-```json
-{
-  "success": true,
-  "message": "Pembayaran berhasil diproses! Status registrasi aktif 🎉",
-  "data": {
-    "id": 1,
-    "registration_id": 1,
-    "amount": 750000,
-    "payment_method": "bank_transfer",
-    "payment_date": "2026-09-01T08:35:00Z",
-    "status": "paid",
-    "registration": {
-      "id": 1,
-      "status": "registered"
-    }
-  }
-}
-```
-
----
-
-### 7. Modul Class Placement (Penempatan Kelas)
-
-| Method | Endpoint | Deskripsi |
+#### 5. Course Registration Module
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/v1/class-placements` | Menempatkan siswa lunas ke kelas tertentu |
-| `GET` | `/api/v1/class-placements` | Mengambil seluruh data penempatan kelas |
-| `GET` | `/api/v1/class-placements/:id` | Mengambil detail penempatan kelas |
+| `POST` | `/api/v1/registrations` | Submit enrollment & auto-generate invoice |
+| `GET` | `/api/v1/registrations` | Fetch all course registrations |
+| `GET` | `/api/v1/registrations/:id` | Fetch registration details and payment status |
+| `PUT` | `/api/v1/registrations/:id/cancel` | Cancel a pending course registration |
 
-#### 🔹 Place Student into Class (`POST /api/v1/class-placements`)
-> **Aturan:** Siswa harus sudah lunas (`status: registered`), course harus cocok, dan kapasitas kelas belum penuh.
+#### 6. Payment Module
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/payments` | Fetch all invoices |
+| `GET` | `/api/v1/payments/:id` | Fetch invoice details by ID |
+| `POST` | `/api/v1/payments/:id/pay` | Settle payment invoice and activate registration |
 
-```bash
-curl -X POST http://localhost:8080/api/v1/class-placements \
-  -H "Content-Type: application/json" \
-  -d '{
-    "registration_id": 1,
-    "class_id": 1
-  }'
-```
-
-**Response (`201 Created`):**
-```json
-{
-  "success": true,
-  "message": "Student berhasil ditempatkan ke dalam kelas 🎉",
-  "data": {
-    "id": 1,
-    "registration_id": 1,
-    "class_id": 1,
-    "placement_date": "2026-09-01T08:40:00Z",
-    "registration": {
-      "id": 1,
-      "student": {
-        "id": 1,
-        "name": "Budi Santoso"
-      }
-    },
-    "class": {
-      "id": 1,
-      "name": "Basic English Pagi",
-      "capacity": 15,
-      "schedule": "Senin & Rabu, 09:00 - 11:00",
-      "status": "open"
-    }
-  }
-}
-```
-
-#### 🔹 Check Students in Class (`GET /api/v1/classes/1/students`)
-```bash
-curl -X GET http://localhost:8080/api/v1/classes/1/students
-```
-
-**Response (`200 OK`):**
-```json
-{
-  "success": true,
-  "message": "Daftar siswa dalam kelas berhasil diambil",
-  "data": [
-    {
-      "id": 1,
-      "name": "Budi Santoso",
-      "email": "budi.santoso@example.com",
-      "phone": "081234567890"
-    }
-  ]
-}
-```
+#### 7. Class Placement Module
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/v1/class-placements` | Assign a paid student to a verified class |
+| `GET` | `/api/v1/class-placements` | Fetch all student class assignments |
+| `GET` | `/api/v1/class-placements/:id` | Fetch class placement details by ID |
 
 ---
 
-## 📄 Lisensi
-Project ini dibuat sebagai materi pembelajaran backend Go berstandar clean layered architecture.
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.

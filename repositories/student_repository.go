@@ -1,3 +1,4 @@
+// Package repositories provides data access layer abstraction and database operations via GORM.
 package repositories
 
 import (
@@ -8,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// StudentRepository adalah interface abstraksi untuk operasi database entitas Student
+// StudentRepository defines the data access contract for Student entities.
 type StudentRepository interface {
 	Create(student *models.Student) error
 	FindAll() ([]models.Student, error)
@@ -22,7 +23,7 @@ type studentRepository struct {
 	db *gorm.DB
 }
 
-// NewStudentRepository menginisialisasi implementasi StudentRepository
+// NewStudentRepository creates a new StudentRepository instance.
 func NewStudentRepository(db *gorm.DB) StudentRepository {
 	return &studentRepository{db: db}
 }
@@ -68,3 +69,4 @@ func (r *studentRepository) Update(student *models.Student) error {
 func (r *studentRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Student{}, id).Error
 }
+

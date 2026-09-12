@@ -1,3 +1,4 @@
+// Package repositories provides data access layer abstraction and database operations via GORM.
 package repositories
 
 import (
@@ -8,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// RegistrationRepository interface untuk operasi database pendaftaran
+// RegistrationRepository defines the data access contract for Registration entities.
 type RegistrationRepository interface {
 	CreateWithPayment(registration *models.Registration, payment *models.Payment) error
 	FindAll() ([]models.Registration, error)
@@ -23,19 +24,20 @@ type registrationRepository struct {
 	db *gorm.DB
 }
 
+// NewRegistrationRepository creates a new RegistrationRepository instance.
 func NewRegistrationRepository(db *gorm.DB) RegistrationRepository {
 	return &registrationRepository{db: db}
 }
 
-// CreateWithPayment membuat data registrasi dan data payment secara atomik dalam 1 transaksi
+// CreateWithPayment creates both registration and initial pending payment records atomically inside a single transaction.
 func (r *registrationRepository) CreateWithPayment(registration *models.Registration, payment *models.Payment) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// 1. Buat Registration
+		// 1. Create Registration record
 		if err := tx.Create(registration).Error; err != nil {
 			return err
 		}
 
-		// 2. Set RegistrationID pada Payment dan buat Payment
+		// 2. Set foreign key RegistrationID on Payment and persist
 		payment.RegistrationID = registration.ID
 		if err := tx.Create(payment).Error; err != nil {
 			return err
@@ -115,3 +117,4 @@ func (r *registrationRepository) FindActiveRegistration(studentID, courseID uint
 func (r *registrationRepository) UpdateStatus(id uint, status string) error {
 	return r.db.Model(&models.Registration{}).Where("id = ?", id).Update("status", status).Error
 }
+

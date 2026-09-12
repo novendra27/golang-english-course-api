@@ -1,3 +1,4 @@
+// Package services implements the core business logic and state machine workflows.
 package services
 
 import (
@@ -28,7 +29,7 @@ type UpdateCourseRequest struct {
 	Status      string  `json:"status" binding:"required"`
 }
 
-// CourseService interface
+// CourseService defines the business logic operations for Course management.
 type CourseService interface {
 	Create(req CreateCourseRequest) (*models.Course, error)
 	GetAll() ([]models.Course, error)
@@ -41,7 +42,7 @@ type courseService struct {
 	repo repositories.CourseRepository
 }
 
-// NewCourseService membuat instance baru CourseService
+// NewCourseService creates a new CourseService instance.
 func NewCourseService(repo repositories.CourseRepository) CourseService {
 	return &courseService{repo: repo}
 }
@@ -114,3 +115,4 @@ func (s *courseService) Delete(id uint) error {
 	}
 	return s.repo.Delete(id)
 }
+

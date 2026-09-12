@@ -1,10 +1,11 @@
+// Package models defines the database domain models and GORM schema mapping.
 package models
 
 import (
 	"time"
 )
 
-// Payment merepresentasikan data pembayaran untuk suatu Registration
+// Payment represents a payment record associated with a course Registration.
 type Payment struct {
 	ID             uint          `gorm:"primaryKey;autoIncrement" json:"id"`
 	RegistrationID uint          `gorm:"not null;uniqueIndex" json:"registration_id"`
@@ -16,3 +17,4 @@ type Payment struct {
 	CreatedAt      time.Time     `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt      time.Time     `gorm:"autoUpdateTime" json:"updated_at"`
 }
+

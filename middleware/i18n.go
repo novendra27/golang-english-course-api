@@ -1,3 +1,4 @@
+// Package middleware provides custom Gin middlewares for logging and localization.
 package middleware
 
 import (
@@ -6,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// I18nMiddleware mendeteksi preferensi bahasa dari query parameter atau header Accept-Language
+// I18nMiddleware detects language preference from query parameters ('lang') or the 'Accept-Language' HTTP header.
 func I18nMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. Cek dari query parameter (misal: ?lang=id atau ?lang=en)
+		// 1. Check query parameter (e.g. ?lang=id or ?lang=en)
 		lang := strings.ToLower(strings.TrimSpace(c.Query("lang")))
 
-		// 2. Jika query kosong, baca dari header HTTP Accept-Language
+		// 2. If query parameter is empty, inspect HTTP Accept-Language header
 		if lang == "" {
 			acceptLang := strings.ToLower(c.GetHeader("Accept-Language"))
 			if strings.Contains(acceptLang, "id") {
@@ -22,14 +23,15 @@ func I18nMiddleware() gin.HandlerFunc {
 			}
 		}
 
-		// 3. Fallback default ke 'en' jika tidak dikenali atau kosong
+		// 3. Fallback default to 'en' if invalid or empty
 		if lang != "id" && lang != "en" {
 			lang = "en"
 		}
 
-		// Simpan preferensi bahasa ke context
+		// Store active language code in Gin Context
 		c.Set("lang", lang)
 
 		c.Next()
 	}
 }
+

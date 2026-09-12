@@ -73,15 +73,15 @@ func TestClassPlacementService_PlaceStudent(t *testing.T) {
 
 	regRepo := &mockRegistrationRepo{
 		registrations: map[uint]*models.Registration{
-			1: {ID: 1, StudentID: 1, CourseID: 1, Status: "registered"}, // Lunas & siap placement
-			2: {ID: 2, StudentID: 2, CourseID: 1, Status: "pending"},    // Belum bayar
-			3: {ID: 3, StudentID: 3, CourseID: 1, Status: "registered"}, // Lunas
+			1: {ID: 1, StudentID: 1, CourseID: 1, Status: "registered"}, // Paid & ready for placement
+			2: {ID: 2, StudentID: 2, CourseID: 1, Status: "pending"},    // Unpaid
+			3: {ID: 3, StudentID: 3, CourseID: 1, Status: "registered"}, // Paid
 		},
 	}
 
 	placementRepo := &mockPlacementRepo{
 		placements:   make(map[uint]*models.ClassPlacement),
-		countByClass: map[uint]int64{3: 1}, // Kelas 3 sudah terisi 1 orang (penuh)
+		countByClass: map[uint]int64{3: 1}, // Class 3 is full (capacity: 1, current: 1)
 	}
 
 	service := services.NewClassPlacementService(placementRepo, regRepo, classRepo)
@@ -106,7 +106,7 @@ func TestClassPlacementService_PlaceStudent(t *testing.T) {
 	})
 
 	t.Run("Reject Course Mismatch", func(t *testing.T) {
-		// Reg 3 daftar Course 1, tapi ditempatkan di Class 2 (Course 2)
+		// Reg 3 registered for Course 1, but attempted placement in Class 2 (Course 2)
 		req := services.CreateClassPlacementRequest{RegistrationID: 3, ClassID: 2}
 		_, err := service.PlaceStudent(req)
 		if !errors.Is(err, services.ErrPlacementCourseMismatch) {
@@ -115,13 +115,14 @@ func TestClassPlacementService_PlaceStudent(t *testing.T) {
 	})
 
 	t.Run("Reject Duplicate Placement for Same Registration", func(t *testing.T) {
-		// Reg 1 sudah ditempatkan di test case 1
+		// Reg 1 was already placed in the first test case
 		req := services.CreateClassPlacementRequest{RegistrationID: 1, ClassID: 1}
 		_, err := service.PlaceStudent(req)
 		if !errors.Is(err, services.ErrPlacementAlreadyAssigned) {
 			t.Errorf("expected ErrPlacementAlreadyAssigned, got: %v", err)
 		}
 	})
+
 
 	t.Run("Reject Full Class Capacity", func(t *testing.T) {
 		req := services.CreateClassPlacementRequest{RegistrationID: 3, ClassID: 3}

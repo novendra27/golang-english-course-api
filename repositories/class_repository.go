@@ -1,3 +1,4 @@
+// Package repositories provides data access layer abstraction and database operations via GORM.
 package repositories
 
 import (
@@ -8,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// ClassRepository interface untuk database operation entitas Class
+// ClassRepository defines the data access contract for Class entities.
 type ClassRepository interface {
 	Create(class *models.Class) error
 	FindAll() ([]models.Class, error)
@@ -23,7 +24,7 @@ type classRepository struct {
 	db *gorm.DB
 }
 
-// NewClassRepository menginisialisasi implementasi ClassRepository
+// NewClassRepository creates a new ClassRepository instance.
 func NewClassRepository(db *gorm.DB) ClassRepository {
 	return &classRepository{db: db}
 }
@@ -76,3 +77,4 @@ func (r *classRepository) GetStudentsByClassID(classID uint) ([]models.Student, 
 
 	return students, err
 }
+

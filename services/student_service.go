@@ -1,3 +1,4 @@
+// Package services implements the core business logic and state machine workflows.
 package services
 
 import (
@@ -25,7 +26,7 @@ type UpdateStudentRequest struct {
 	Phone string `json:"phone" binding:"required"`
 }
 
-// StudentService interface
+// StudentService defines the business logic operations for Student management.
 type StudentService interface {
 	Create(req CreateStudentRequest) (*models.Student, error)
 	GetAll() ([]models.Student, error)
@@ -38,13 +39,13 @@ type studentService struct {
 	repo repositories.StudentRepository
 }
 
-// NewStudentService membuat instance baru StudentService
+// NewStudentService creates a new StudentService instance.
 func NewStudentService(repo repositories.StudentRepository) StudentService {
 	return &studentService{repo: repo}
 }
 
 func (s *studentService) Create(req CreateStudentRequest) (*models.Student, error) {
-	// 1. Cek duplikasi email
+	// 1. Check for email duplication
 	existing, err := s.repo.FindByEmail(req.Email)
 	if err != nil {
 		return nil, err
@@ -90,7 +91,7 @@ func (s *studentService) Update(id uint, req UpdateStudentRequest) (*models.Stud
 		return nil, ErrStudentNotFound
 	}
 
-	// Cek apakah email diubah dan sudah dipakai oleh student lain
+	// Check if updated email conflicts with another student
 	if req.Email != student.Email {
 		existing, err := s.repo.FindByEmail(req.Email)
 		if err != nil {
@@ -122,3 +123,4 @@ func (s *studentService) Delete(id uint) error {
 	}
 	return s.repo.Delete(id)
 }
+

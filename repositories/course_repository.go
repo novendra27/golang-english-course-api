@@ -1,3 +1,4 @@
+// Package repositories provides data access layer abstraction and database operations via GORM.
 package repositories
 
 import (
@@ -8,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// CourseRepository adalah interface abstraksi untuk operasi database entitas Course
+// CourseRepository defines the data access contract for Course entities.
 type CourseRepository interface {
 	Create(course *models.Course) error
 	FindAll() ([]models.Course, error)
@@ -21,7 +22,7 @@ type courseRepository struct {
 	db *gorm.DB
 }
 
-// NewCourseRepository menginisialisasi implementasi CourseRepository
+// NewCourseRepository creates a new CourseRepository instance.
 func NewCourseRepository(db *gorm.DB) CourseRepository {
 	return &courseRepository{db: db}
 }
@@ -55,3 +56,4 @@ func (r *courseRepository) Update(course *models.Course) error {
 func (r *courseRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Course{}, id).Error
 }
+

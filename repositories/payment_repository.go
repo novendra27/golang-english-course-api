@@ -1,3 +1,4 @@
+// Package repositories provides data access layer abstraction and database operations via GORM.
 package repositories
 
 import (
@@ -9,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// PaymentRepository interface untuk operasi database pembayaran
+// PaymentRepository defines the data access contract for Payment entities.
 type PaymentRepository interface {
 	FindAll() ([]models.Payment, error)
 	FindByID(id uint) (*models.Payment, error)
@@ -21,6 +22,7 @@ type paymentRepository struct {
 	db *gorm.DB
 }
 
+// NewPaymentRepository creates a new PaymentRepository instance.
 func NewPaymentRepository(db *gorm.DB) PaymentRepository {
 	return &paymentRepository{db: db}
 }
@@ -64,16 +66,16 @@ func (r *paymentRepository) FindByRegistrationID(registrationID uint) (*models.P
 	return &payment, nil
 }
 
-// ProcessPaymentSuccess mengubah status Payment menjadi 'paid' dan Registration menjadi 'registered' dalam 1 database transaction
+// ProcessPaymentSuccess transitions payment status to 'paid' and registration status to 'registered' atomically in one transaction.
 func (r *paymentRepository) ProcessPaymentSuccess(paymentID uint, method string, paidAt time.Time) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// 1. Ambil data payment
+		// 1. Fetch payment record
 		var payment models.Payment
 		if err := tx.First(&payment, paymentID).Error; err != nil {
 			return err
 		}
 
-		// 2. Update status Payment
+		// 2. Update payment status
 		payment.Status = "paid"
 		payment.PaymentMethod = method
 		payment.PaymentDate = &paidAt
@@ -81,7 +83,7 @@ func (r *paymentRepository) ProcessPaymentSuccess(paymentID uint, method string,
 			return err
 		}
 
-		// 3. Update status Registration menjadi 'registered'
+		// 3. Update associated registration status to 'registered'
 		if err := tx.Model(&models.Registration{}).
 			Where("id = ?", payment.RegistrationID).
 			Update("status", "registered").Error; err != nil {
@@ -91,3 +93,4 @@ func (r *paymentRepository) ProcessPaymentSuccess(paymentID uint, method string,
 		return nil
 	})
 }
+

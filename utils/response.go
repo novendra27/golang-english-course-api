@@ -1,3 +1,4 @@
+// Package utils provides common utility helpers including standardized JSON responses and i18n support.
 package utils
 
 import (
@@ -8,7 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// APIResponse merepresentasikan format JSON response standar aplikasi
+// APIResponse represents the standard JSON API response structure.
 type APIResponse struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
@@ -16,7 +17,7 @@ type APIResponse struct {
 	Errors  interface{} `json:"errors,omitempty"`
 }
 
-// SuccessResponse mengirimkan format response sukses dengan status code dan data
+// SuccessResponse writes a standardized JSON success response to the Gin context.
 func SuccessResponse(c *gin.Context, statusCode int, message string, data interface{}) {
 	c.JSON(statusCode, APIResponse{
 		Success: true,
@@ -25,7 +26,7 @@ func SuccessResponse(c *gin.Context, statusCode int, message string, data interf
 	})
 }
 
-// ErrorResponse mengirimkan format response error terstandarisasi
+// ErrorResponse writes a standardized JSON error response to the Gin context.
 func ErrorResponse(c *gin.Context, statusCode int, message string, errDetails interface{}) {
 	if statusCode == 0 {
 		statusCode = http.StatusInternalServerError
@@ -38,7 +39,7 @@ func ErrorResponse(c *gin.Context, statusCode int, message string, errDetails in
 	})
 }
 
-// ValidationErrorResponse menerjemahkan error dari validator.ValidationErrors menjadi pesan error multi-bahasa per-field
+// ValidationErrorResponse translates validator.ValidationErrors into field-level localized error messages.
 func ValidationErrorResponse(c *gin.Context, err error) {
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
@@ -54,11 +55,12 @@ func ValidationErrorResponse(c *gin.Context, err error) {
 		return
 	}
 
-	// Jika bukan tipe validator.ValidationErrors (misal invalid JSON syntax)
+	// Fallback for non-validator errors (e.g. malformed JSON syntax)
 	c.JSON(http.StatusBadRequest, APIResponse{
 		Success: false,
 		Message: Translate(c, "system.invalid_json", nil),
 		Errors:  err.Error(),
 	})
 }
+
 

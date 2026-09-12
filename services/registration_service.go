@@ -1,3 +1,4 @@
+// Package services implements the core business logic and state machine workflows.
 package services
 
 import (
@@ -22,6 +23,7 @@ type CreateRegistrationRequest struct {
 	CourseID  uint `json:"course_id" binding:"required"`
 }
 
+// RegistrationService defines the business logic operations for Registration workflows.
 type RegistrationService interface {
 	Register(req CreateRegistrationRequest) (*models.Registration, error)
 	GetAll() ([]models.Registration, error)
@@ -37,6 +39,7 @@ type registrationService struct {
 	courseRepo  repositories.CourseRepository
 }
 
+// NewRegistrationService creates a new RegistrationService instance.
 func NewRegistrationService(
 	regRepo repositories.RegistrationRepository,
 	studentRepo repositories.StudentRepository,
@@ -50,7 +53,7 @@ func NewRegistrationService(
 }
 
 func (s *registrationService) Register(req CreateRegistrationRequest) (*models.Registration, error) {
-	// 1. Validasi keberadaan Student
+	// 1. Validate existence of Student
 	student, err := s.studentRepo.FindByID(req.StudentID)
 	if err != nil {
 		return nil, err
@@ -59,7 +62,7 @@ func (s *registrationService) Register(req CreateRegistrationRequest) (*models.R
 		return nil, ErrRegistrationStudentNotFound
 	}
 
-	// 2. Validasi keberadaan Course & Status
+	// 2. Validate existence and active status of Course
 	course, err := s.courseRepo.FindByID(req.CourseID)
 	if err != nil {
 		return nil, err
@@ -71,7 +74,7 @@ func (s *registrationService) Register(req CreateRegistrationRequest) (*models.R
 		return nil, ErrRegistrationCourseInactive
 	}
 
-	// 3. Validasi Duplikasi Registrasi Aktif
+	// 3. Prevent duplicate active registrations (status: 'pending' or 'registered')
 	activeReg, err := s.regRepo.FindActiveRegistration(req.StudentID, req.CourseID)
 	if err != nil {
 		return nil, err
@@ -80,7 +83,7 @@ func (s *registrationService) Register(req CreateRegistrationRequest) (*models.R
 		return nil, ErrRegistrationAlreadyActive
 	}
 
-	// 4. Siapkan Model Registrasi & Payment
+	// 4. Prepare Registration and initial Payment records
 	now := time.Now()
 	registration := &models.Registration{
 		StudentID:        req.StudentID,
@@ -99,7 +102,7 @@ func (s *registrationService) Register(req CreateRegistrationRequest) (*models.R
 		return nil, err
 	}
 
-	// Attach relasi untuk response
+	// Attach relations for response
 	registration.Student = student
 	registration.Course = course
 	registration.Payment = payment
@@ -153,7 +156,8 @@ func (s *registrationService) CancelRegistration(id uint) error {
 		return ErrRegistrationNotFound
 	}
 
-	if reg.Status == "completed" || reg.Status == "cancelled" {
+	// Only 'pending' registrations can be cancelled
+	if reg.Status != "pending" {
 		return ErrRegistrationCannotBeCanceled
 	}
 

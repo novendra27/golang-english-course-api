@@ -1,3 +1,4 @@
+// Package utils provides common utility helpers including standardized JSON responses and i18n support.
 package utils
 
 import (
@@ -15,12 +16,12 @@ import (
 
 var bundle *i18n.Bundle
 
-// InitI18n menginisialisasi bundle i18n dan memuat file kamus bahasa dari embedded filesystem
+// InitI18n initializes the i18n bundle and loads translation dictionary files from the embedded filesystem.
 func InitI18n() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	// Load file kamus dari embedded filesystem (locales.FS)
+	// Load dictionary files from embedded filesystem (locales.FS)
 	if _, err := bundle.LoadMessageFileFS(locales.FS, "en.json"); err != nil {
 		log.Warn().Err(err).Msg("Failed to load embedded locales/en.json")
 	}
@@ -31,7 +32,7 @@ func InitI18n() {
 	log.Info().Msg("i18n Bundle successfully initialized with embedded locales (en, id) 🌐")
 }
 
-// Translate menerjemahkan messageID ke bahasa aktif yang ada di context Gin
+// Translate localizes a given messageID based on the active language stored in the Gin context.
 func Translate(c *gin.Context, messageID string, templateData map[string]interface{}) string {
 	if bundle == nil {
 		return messageID
@@ -57,7 +58,7 @@ func Translate(c *gin.Context, messageID string, templateData map[string]interfa
 	return msg
 }
 
-// TranslateValidationError menerjemahkan error tag dari validator/v10 sesuai bahasa aktif
+// TranslateValidationError translates validator/v10 field error tags into human-readable localized messages.
 func TranslateValidationError(c *gin.Context, fe validator.FieldError) string {
 	field := fe.Field()
 	tag := fe.Tag()
@@ -71,10 +72,11 @@ func TranslateValidationError(c *gin.Context, fe validator.FieldError) string {
 	}
 
 	translated := Translate(c, msgKey, templateData)
-	// Jika key tidak ditemukan di kamus, fallback ke default formatter
+	// If the specific key is not defined, fallback to generic validation message
 	if translated == msgKey {
 		return Translate(c, "validation.default", templateData)
 	}
 
 	return translated
 }
+

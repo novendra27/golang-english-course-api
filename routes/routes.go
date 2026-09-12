@@ -1,3 +1,4 @@
+// Package routes defines API route groups, middleware bindings, and dependency injection wiring.
 package routes
 
 import (
@@ -17,7 +18,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// SetupRouter menginisialisasi Gin Engine, middleware, dependency injection, dan mendaftarkan route endpoint
+// SetupRouter initializes the Gin Engine, registers global middlewares, wires dependencies, and mounts API endpoints.
 func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -27,7 +28,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	r := gin.New()
 
-	// 1. Middleware Global
+	// 1. Global Middlewares
 	r.Use(gin.Recovery())
 	r.Use(middleware.HTTPLogger())
 	r.Use(middleware.I18nMiddleware())
@@ -44,7 +45,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	// 3. Swagger UI Endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// 4. Inisialisasi Repositories
+	// 4. Initialize Repositories
 	studentRepo := repositories.NewStudentRepository(db)
 	courseRepo := repositories.NewCourseRepository(db)
 	classRepo := repositories.NewClassRepository(db)
@@ -52,7 +53,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	paymentRepo := repositories.NewPaymentRepository(db)
 	placementRepo := repositories.NewClassPlacementRepository(db)
 
-	// 5. Inisialisasi Services
+	// 5. Initialize Services
 	studentService := services.NewStudentService(studentRepo)
 	courseService := services.NewCourseService(courseRepo)
 	classService := services.NewClassService(classRepo, courseRepo)
@@ -60,7 +61,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	paymentService := services.NewPaymentService(paymentRepo)
 	placementService := services.NewClassPlacementService(placementRepo, registrationRepo, classRepo)
 
-	// 6. Inisialisasi Handlers
+	// 6. Initialize Handlers
 	studentHandler := handlers.NewStudentHandler(studentService)
 	courseHandler := handlers.NewCourseHandler(courseService)
 	classHandler := handlers.NewClassHandler(classService)
@@ -139,3 +140,4 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	return r
 }
+

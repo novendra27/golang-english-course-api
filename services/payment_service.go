@@ -1,3 +1,4 @@
+// Package services implements the core business logic and state machine workflows.
 package services
 
 import (
@@ -20,6 +21,7 @@ type ProcessPaymentRequest struct {
 	Amount        float64 `json:"amount" binding:"required,gt=0"`
 }
 
+// PaymentService defines the business logic operations for Payment settlement.
 type PaymentService interface {
 	GetAll() ([]models.Payment, error)
 	GetByID(id uint) (*models.Payment, error)
@@ -30,6 +32,7 @@ type paymentService struct {
 	paymentRepo repositories.PaymentRepository
 }
 
+// NewPaymentService creates a new PaymentService instance.
 func NewPaymentService(paymentRepo repositories.PaymentRepository) PaymentService {
 	return &paymentService{paymentRepo: paymentRepo}
 }
@@ -50,7 +53,7 @@ func (s *paymentService) GetByID(id uint) (*models.Payment, error) {
 }
 
 func (s *paymentService) Pay(paymentID uint, req ProcessPaymentRequest) (*models.Payment, error) {
-	// 1. Ambil data payment
+	// 1. Fetch payment record
 	payment, err := s.paymentRepo.FindByID(paymentID)
 	if err != nil {
 		return nil, err
@@ -59,7 +62,7 @@ func (s *paymentService) Pay(paymentID uint, req ProcessPaymentRequest) (*models
 		return nil, ErrPaymentNotFound
 	}
 
-	// 2. Validasi Status Pembayaran
+	// 2. Validate current payment status
 	if payment.Status == "paid" {
 		return nil, ErrPaymentAlreadyPaid
 	}
@@ -67,7 +70,7 @@ func (s *paymentService) Pay(paymentID uint, req ProcessPaymentRequest) (*models
 		return nil, ErrPaymentInvalidStatus
 	}
 
-	// 3. Validasi Jumlah Pembayaran
+	// 3. Validate payment amount
 	if req.Amount < payment.Amount {
 		return nil, ErrPaymentAmountInvalid
 	}
@@ -77,6 +80,7 @@ func (s *paymentService) Pay(paymentID uint, req ProcessPaymentRequest) (*models
 		return nil, err
 	}
 
-	// Ambil data terbaru setelah transaksi
+	// Fetch updated record after transaction
 	return s.paymentRepo.FindByID(paymentID)
 }
+

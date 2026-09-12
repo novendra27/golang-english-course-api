@@ -1,3 +1,4 @@
+// Package services implements the core business logic and state machine workflows.
 package services
 
 import (
@@ -24,6 +25,7 @@ type CreateClassPlacementRequest struct {
 	ClassID        uint `json:"class_id" binding:"required"`
 }
 
+// ClassPlacementService defines the business logic operations for Class Placement workflows.
 type ClassPlacementService interface {
 	PlaceStudent(req CreateClassPlacementRequest) (*models.ClassPlacement, error)
 	GetAll() ([]models.ClassPlacement, error)
@@ -36,6 +38,7 @@ type classPlacementService struct {
 	classRepo     repositories.ClassRepository
 }
 
+// NewClassPlacementService creates a new ClassPlacementService instance.
 func NewClassPlacementService(
 	placementRepo repositories.ClassPlacementRepository,
 	regRepo repositories.RegistrationRepository,
@@ -49,7 +52,7 @@ func NewClassPlacementService(
 }
 
 func (s *classPlacementService) PlaceStudent(req CreateClassPlacementRequest) (*models.ClassPlacement, error) {
-	// 1. Validasi Keberadaan Registrasi
+	// 1. Validate existence of Registration
 	reg, err := s.regRepo.FindByID(req.RegistrationID)
 	if err != nil {
 		return nil, err
@@ -58,12 +61,12 @@ func (s *classPlacementService) PlaceStudent(req CreateClassPlacementRequest) (*
 		return nil, ErrPlacementRegNotFound
 	}
 
-	// 2. ATURAN BISNIS: Registrasi harus berstatus 'registered' (Pembayaran sudah 'paid')
+	// 2. BUSINESS RULE: Registration status must be 'registered' (Payment is settled)
 	if reg.Status != "registered" {
 		return nil, ErrPlacementPaymentRequired
 	}
 
-	// 3. Validasi Keberadaan Kelas
+	// 3. Validate existence of Class
 	class, err := s.classRepo.FindByID(req.ClassID)
 	if err != nil {
 		return nil, err
@@ -76,12 +79,12 @@ func (s *classPlacementService) PlaceStudent(req CreateClassPlacementRequest) (*
 		return nil, ErrPlacementClassClosed
 	}
 
-	// 4. ATURAN BISNIS: Course pendaftaran harus SAMA dengan Course pada Kelas
+	// 4. BUSINESS RULE: Registration Course must MATCH the Class Course
 	if reg.CourseID != class.CourseID {
 		return nil, ErrPlacementCourseMismatch
 	}
 
-	// 5. ATURAN BISNIS: Cek apakah registrasi sudah pernah di-assign ke kelas
+	// 5. BUSINESS RULE: Prevent duplicate class placements for the same registration
 	existingPlacement, err := s.placementRepo.FindByRegistrationID(req.RegistrationID)
 	if err != nil {
 		return nil, err
@@ -90,7 +93,7 @@ func (s *classPlacementService) PlaceStudent(req CreateClassPlacementRequest) (*
 		return nil, ErrPlacementAlreadyAssigned
 	}
 
-	// 6. ATURAN BISNIS: Cek Kapasitas Kelas
+	// 6. BUSINESS RULE: Check Class Capacity
 	currentCount, err := s.placementRepo.CountByClassID(req.ClassID)
 	if err != nil {
 		return nil, err
@@ -102,7 +105,7 @@ func (s *classPlacementService) PlaceStudent(req CreateClassPlacementRequest) (*
 
 	isClassFull := (int(currentCount)+1 >= class.Capacity)
 
-	// 7. Simpan Placement dalam Database Transaction
+	// 7. Persist ClassPlacement in an atomic database transaction
 	now := time.Now()
 	placement := &models.ClassPlacement{
 		RegistrationID: req.RegistrationID,
@@ -114,7 +117,7 @@ func (s *classPlacementService) PlaceStudent(req CreateClassPlacementRequest) (*
 		return nil, err
 	}
 
-	// Attach relasi untuk response
+	// Attach relations for response
 	placement.Registration = reg
 	placement.Class = class
 
@@ -135,3 +138,4 @@ func (s *classPlacementService) GetByID(id uint) (*models.ClassPlacement, error)
 	}
 	return placement, nil
 }
+

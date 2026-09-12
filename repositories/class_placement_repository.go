@@ -1,3 +1,4 @@
+// Package repositories provides data access layer abstraction and database operations via GORM.
 package repositories
 
 import (
@@ -8,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// ClassPlacementRepository interface untuk operasi database penempatan kelas
+// ClassPlacementRepository defines the data access contract for ClassPlacement entities.
 type ClassPlacementRepository interface {
 	CreatePlacement(placement *models.ClassPlacement, isClassFull bool) error
 	FindAll() ([]models.ClassPlacement, error)
@@ -21,27 +22,26 @@ type classPlacementRepository struct {
 	db *gorm.DB
 }
 
+// NewClassPlacementRepository creates a new ClassPlacementRepository instance.
 func NewClassPlacementRepository(db *gorm.DB) ClassPlacementRepository {
 	return &classPlacementRepository{db: db}
 }
 
-// CreatePlacement menyimpan penempatan kelas dan mengupdate status kelas menjadi 'full' jika kapasitas tercapai secara atomik
+// CreatePlacement records class placement and marks class status as 'full' if capacity is met atomically.
 func (r *classPlacementRepository) CreatePlacement(placement *models.ClassPlacement, isClassFull bool) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// 1. Simpan ClassPlacement
+		// 1. Persist ClassPlacement record
 		if err := tx.Create(placement).Error; err != nil {
 			return err
 		}
 
-		// 2. Jika kapasitas kelas telah penuh, update status kelas menjadi 'full'
+		// 2. If class reaches max capacity, update its status to 'full'
 		if isClassFull {
 			if err := tx.Model(&models.Class{}).Where("id = ?", placement.ClassID).Update("status", "full").Error; err != nil {
 				return err
 			}
 		}
 
-		// 3. Update status Registration menjadi 'completed' (atau tetap 'registered' dengan placement aktif)
-		// Registration tetap 'registered' atau 'completed'
 		return nil
 	})
 }
@@ -94,3 +94,4 @@ func (r *classPlacementRepository) CountByClassID(classID uint) (int64, error) {
 	err := r.db.Model(&models.ClassPlacement{}).Where("class_id = ?", classID).Count(&count).Error
 	return count, err
 }
+

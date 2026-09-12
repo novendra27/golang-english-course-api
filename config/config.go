@@ -1,3 +1,4 @@
+// Package config handles environment variable loading and database initialization.
 package config
 
 import (
@@ -8,14 +9,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// AppConfig menampung konfigurasi aplikasi
+// AppConfig holds core application configurations.
 type AppConfig struct {
 	Env  string
 	Port string
 	Name string
 }
 
-// DBConfig menampung parameter koneksi database PostgreSQL murni dari .env
+// DBConfig holds PostgreSQL connection credentials loaded from environment variables.
 type DBConfig struct {
 	Host     string
 	Port     string
@@ -26,24 +27,24 @@ type DBConfig struct {
 	TimeZone string
 }
 
-// LogConfig menampung parameter konfigurasi logging
+// LogConfig holds logging configuration parameters.
 type LogConfig struct {
 	Level  string
 	Pretty bool
 }
 
-// Config adalah root container konfigurasi
+// Config is the root configuration container.
 type Config struct {
 	App AppConfig
 	DB  DBConfig
 	Log LogConfig
 }
 
-// LoadConfig memuat environment variables murni dari file .env
+// LoadConfig loads environment variables from a .env file or system environment.
 func LoadConfig() (*Config, error) {
-	// 1. Muat file .env jika ada
+	// 1. Load .env file if available
 	if err := godotenv.Load(); err != nil {
-		log.Warn().Msg("File .env tidak ditemukan, membaca dari environment variables sistem")
+		log.Warn().Msg(".env file not found, loading from system environment variables")
 	}
 
 	cfg := &Config{
@@ -67,7 +68,7 @@ func LoadConfig() (*Config, error) {
 		},
 	}
 
-	// 2. Validasi field database wajib (wajib ada di .env)
+	// 2. Validate mandatory database environment variables
 	if err := cfg.validateDBConfig(); err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func LoadConfig() (*Config, error) {
 	return cfg, nil
 }
 
-// validateDBConfig memvalidasi apakah semua kredensial database yang dibutuhkan sudah diset di .env
+// validateDBConfig validates that all required database credentials are present.
 func (c *Config) validateDBConfig() error {
 	missing := []string{}
 
@@ -93,16 +94,16 @@ func (c *Config) validateDBConfig() error {
 	}
 
 	if len(missing) > 0 {
-		return fmt.Errorf("variabel database wajib belum diset di .env: %v", missing)
+		return fmt.Errorf("missing required database environment variables: %v", missing)
 	}
 
 	return nil
 }
 
-// getEnv membaca env var atau mengembalikan fallback jika tidak diset (khusus non-kredensial)
-func getEnv(key, defaultVal string) string {
+// getEnv retrieves an environment variable or returns a fallback value.
+func getEnv(key, fallback string) string {
 	if val := os.Getenv(key); val != "" {
 		return val
 	}
-	return defaultVal
+	return fallback
 }
