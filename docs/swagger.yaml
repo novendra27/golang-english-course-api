@@ -1,0 +1,1299 @@
+basePath: /api/v1
+definitions:
+  models.Class:
+    properties:
+      capacity:
+        type: integer
+      course:
+        $ref: '#/definitions/models.Course'
+      course_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        description: 'Contoh: "Basic English A"'
+        type: string
+      schedule:
+        description: 'Contoh: "Senin & Rabu, 19:00 - 21:00"'
+        type: string
+      status:
+        description: '''open'', ''full'', ''closed'''
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ClassPlacement:
+    properties:
+      class:
+        $ref: '#/definitions/models.Class'
+      class_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      placement_date:
+        type: string
+      registration:
+        $ref: '#/definitions/models.Registration'
+      registration_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Course:
+    properties:
+      classes:
+        items:
+          $ref: '#/definitions/models.Class'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        description: 'Contoh: "3 Bulan", "48 Jam"'
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      status:
+        description: '''active'', ''inactive'''
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Payment:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: integer
+      payment_date:
+        type: string
+      payment_method:
+        description: '''bank_transfer'', ''ewallet'', ''credit_card'''
+        type: string
+      registration:
+        $ref: '#/definitions/models.Registration'
+      registration_id:
+        type: integer
+      status:
+        description: '''pending'', ''paid'', ''failed'', ''refunded'''
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Registration:
+    properties:
+      class_placement:
+        $ref: '#/definitions/models.ClassPlacement'
+      course:
+        $ref: '#/definitions/models.Course'
+      course_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      payment:
+        $ref: '#/definitions/models.Payment'
+      registration_date:
+        type: string
+      status:
+        description: '''pending'', ''registered'', ''cancelled'', ''completed'''
+        type: string
+      student:
+        $ref: '#/definitions/models.Student'
+      student_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Student:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  services.CreateClassPlacementRequest:
+    properties:
+      class_id:
+        type: integer
+      registration_id:
+        type: integer
+    required:
+    - class_id
+    - registration_id
+    type: object
+  services.CreateClassRequest:
+    properties:
+      capacity:
+        type: integer
+      course_id:
+        type: integer
+      name:
+        type: string
+      schedule:
+        type: string
+      status:
+        description: '''open'', ''full'', ''closed'''
+        type: string
+    required:
+    - capacity
+    - course_id
+    - name
+    - schedule
+    type: object
+  services.CreateCourseRequest:
+    properties:
+      description:
+        type: string
+      duration:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      status:
+        description: 'default: ''active'''
+        type: string
+    required:
+    - duration
+    - name
+    - price
+    type: object
+  services.CreateRegistrationRequest:
+    properties:
+      course_id:
+        type: integer
+      student_id:
+        type: integer
+    required:
+    - course_id
+    - student_id
+    type: object
+  services.CreateStudentRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - phone
+    type: object
+  services.ProcessPaymentRequest:
+    properties:
+      amount:
+        type: number
+      payment_method:
+        description: e.g. "bank_transfer", "ewallet", "credit_card"
+        type: string
+    required:
+    - amount
+    - payment_method
+    type: object
+  services.UpdateClassRequest:
+    properties:
+      capacity:
+        type: integer
+      course_id:
+        type: integer
+      name:
+        type: string
+      schedule:
+        type: string
+      status:
+        type: string
+    required:
+    - capacity
+    - course_id
+    - name
+    - schedule
+    - status
+    type: object
+  services.UpdateCourseRequest:
+    properties:
+      description:
+        type: string
+      duration:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      status:
+        type: string
+    required:
+    - duration
+    - name
+    - price
+    - status
+    type: object
+  services.UpdateStudentRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - phone
+    type: object
+  utils.APIResponse:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@englishcourse.com
+    name: Novendra
+  description: RESTful API backend for English course registration with clean layered
+    architecture and dynamic i18n support.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: English Course Registration API
+  version: "1.0"
+paths:
+  /class-placements:
+    get:
+      description: Returns all class placement records along with registration, student,
+        course, and class relations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ClassPlacement'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all class placements
+      tags:
+      - Class Placements
+    post:
+      consumes:
+      - application/json
+      description: Places a student with paid registration ('registered') into a class
+        with capacity and course matching validation
+      parameters:
+      - description: Class placement payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateClassPlacementRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassPlacement'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Place student into class
+      tags:
+      - Class Placements
+  /class-placements/{id}:
+    get:
+      description: Returns detail of a specific class placement by ID
+      parameters:
+      - description: Placement ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassPlacement'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get class placement detail
+      tags:
+      - Class Placements
+  /classes:
+    get:
+      description: Returns all classes along with their Course data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Class'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all classes
+      tags:
+      - Classes
+    post:
+      consumes:
+      - application/json
+      description: Opens a new class under a course with schedule and capacity
+      parameters:
+      - description: Class creation payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateClassRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Create a new class
+      tags:
+      - Classes
+  /classes/{id}:
+    delete:
+      description: Deletes a class by ID
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Delete class data
+      tags:
+      - Classes
+    get:
+      description: Returns detail of a specific class by ID
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get class detail
+      tags:
+      - Classes
+    put:
+      consumes:
+      - application/json
+      description: Updates name, capacity, schedule, or status of a class
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update class payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateClassRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Class'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Update class data
+      tags:
+      - Classes
+  /classes/{id}/students:
+    get:
+      description: Returns all students who have been placed into this class
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Student'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get students in a class
+      tags:
+      - Classes
+  /courses:
+    get:
+      description: Returns a catalog of all available English courses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Course'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all courses
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: Creates a new course catalog package with price and duration
+      parameters:
+      - description: Course creation payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Create a new course
+      tags:
+      - Courses
+  /courses/{id}:
+    delete:
+      description: Deletes a course by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Delete course data
+      tags:
+      - Courses
+    get:
+      description: Returns detail of a specific course along with open classes under
+        it
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get course detail with classes
+      tags:
+      - Courses
+    put:
+      consumes:
+      - application/json
+      description: Updates name, description, price, duration, or status of a course
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update course payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Update course data
+      tags:
+      - Courses
+  /courses/{id}/registrations:
+    get:
+      description: Returns all students registered for a specific course
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Registration'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get registrations for a course
+      tags:
+      - Courses
+  /payments:
+    get:
+      description: Returns a list of all payment transaction records
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Payment'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all payment invoices
+      tags:
+      - Payments
+  /payments/{id}:
+    get:
+      description: Returns information of a specific payment invoice by ID
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get payment invoice detail
+      tags:
+      - Payments
+  /payments/{id}/pay:
+    post:
+      consumes:
+      - application/json
+      description: Processes payment settlement and atomically transitions registration
+        status to 'registered'
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payment processing payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.ProcessPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Process simulated payment
+      tags:
+      - Payments
+  /registrations:
+    get:
+      description: Returns all registration records along with student, course, and
+        payment relations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Registration'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all registrations
+      tags:
+      - Registrations
+    post:
+      consumes:
+      - application/json
+      description: Registers a student to a course and automatically generates a pending
+        payment invoice
+      parameters:
+      - description: Registration payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Registration'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Register to a course
+      tags:
+      - Registrations
+  /registrations/{id}:
+    get:
+      description: Returns detail of a registration by ID
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Registration'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get registration detail
+      tags:
+      - Registrations
+  /registrations/{id}/cancel:
+    put:
+      description: Updates registration status to cancelled if not yet completed
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Cancel a registration
+      tags:
+      - Registrations
+  /students:
+    get:
+      description: Returns a list of all registered students
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Student'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all students
+      tags:
+      - Students
+    post:
+      consumes:
+      - application/json
+      description: Creates a new student profile with unique email validation
+      parameters:
+      - description: Student registration payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateStudentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Student'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Register a new student
+      tags:
+      - Students
+  /students/{id}:
+    delete:
+      description: Deletes student data by ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Delete student data
+      tags:
+      - Students
+    get:
+      description: Returns detail of a student by ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Student'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get student profile detail
+      tags:
+      - Students
+    put:
+      consumes:
+      - application/json
+      description: Updates name, email, or phone number of a student
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update student payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateStudentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Student'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Update student profile
+      tags:
+      - Students
+  /students/{id}/registrations:
+    get:
+      description: Returns all registrations made by a specific student
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Registration'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get student registration history
+      tags:
+      - Students
+swagger: "2.0"
