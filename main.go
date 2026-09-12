@@ -6,6 +6,7 @@ import (
 
 	"english-course-api/config"
 	"english-course-api/routes"
+	"english-course-api/utils"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -13,7 +14,7 @@ import (
 
 // @title           English Course Registration API
 // @version         1.0
-// @description     RESTful API backend untuk pendaftaran kursus bahasa Inggris dengan clean layered architecture.
+// @description     RESTful API backend for English course registration with clean layered architecture and dynamic i18n support.
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   Novendra
@@ -25,16 +26,16 @@ import (
 // @host      localhost:8080
 // @BasePath  /api/v1
 func main() {
-	// 1. Setup Zerolog (Pretty output untuk console)
+	// 1. Setup Zerolog (Pretty output for console)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	// 2. Load Konfigurasi murni dari .env
+	// 2. Load Configuration from .env
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Gagal memuat konfigurasi aplikasi")
+		log.Fatal().Err(err).Msg("Failed to load application configuration")
 	}
 
-	// Sesuaikan log level dari config
+	// Adjust log level from config
 	level, err := zerolog.ParseLevel(cfg.Log.Level)
 	if err == nil {
 		zerolog.SetGlobalLevel(level)
@@ -44,30 +45,33 @@ func main() {
 		Str("app_name", cfg.App.Name).
 		Str("env", cfg.App.Env).
 		Str("port", cfg.App.Port).
-		Msg("Memulai inisialisasi aplikasi 🚀")
+		Msg("Starting application initialization 🚀")
 
-	// 3. Inisialisasi Koneksi Database PostgreSQL
+	// 3. Initialize i18n Bundle
+	utils.InitI18n()
+
+	// 4. Initialize PostgreSQL Database Connection
 	db, err := config.ConnectDB(cfg)
 	if err != nil {
-		log.Error().Err(err).Msg("Database connection warning (pastikan PostgreSQL service sedang berjalan)")
+		log.Error().Err(err).Msg("Database connection warning (ensure PostgreSQL service is running)")
 	} else {
 		defer config.CloseDB(db)
 
-		// 4. Auto-Migration skema 6 domain model
+		// 5. Auto-Migration for 6 domain models
 		if err := config.AutoMigrate(db); err != nil {
-			log.Fatal().Err(err).Msg("Gagal melakukan auto-migration database")
+			log.Fatal().Err(err).Msg("Failed to auto-migrate database schema")
 		}
 	}
 
-	// 5. Inisialisasi Router Gin & Middleware
+	// 6. Initialize Gin Router & Middleware
 	router := routes.SetupRouter(db, cfg)
 
-	// 6. Jalankan HTTP Server (Blocking Listener)
+	// 7. Run HTTP Server (Blocking Listener)
 	serverAddr := fmt.Sprintf(":%s", cfg.App.Port)
-	log.Info().Msgf("HTTP Server aktif dan mendengarkan pada http://localhost%s 🌐", serverAddr)
-	log.Info().Msgf("Swagger UI tersedia di: http://localhost%s/swagger/index.html 📑", serverAddr)
+	log.Info().Msgf("HTTP Server is active and listening on http://localhost%s 🌐", serverAddr)
+	log.Info().Msgf("Swagger UI available at: http://localhost%s/swagger/index.html 📑", serverAddr)
 
 	if err := router.Run(serverAddr); err != nil {
-		log.Fatal().Err(err).Msg("Gagal menjalankan HTTP server")
+		log.Fatal().Err(err).Msg("Failed to start HTTP server")
 	}
 }

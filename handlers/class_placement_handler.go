@@ -20,12 +20,12 @@ func NewClassPlacementHandler(service services.ClassPlacementService) *ClassPlac
 }
 
 // PlaceStudent godoc
-// @Summary      Menempatkan siswa ke dalam kelas
-// @Description  Menempatkan siswa yang pendaftarannya sudah lunas ('registered') ke dalam kelas dengan validasi kapasitas dan kesesuaian course
+// @Summary      Place student into class
+// @Description  Places a student with paid registration ('registered') into a class with capacity and course matching validation
 // @Tags         Class Placements
 // @Accept       json
 // @Produce      json
-// @Param        request body services.CreateClassPlacementRequest true "Payload penempatan kelas"
+// @Param        request body services.CreateClassPlacementRequest true "Class placement payload"
 // @Success      201  {object}  utils.APIResponse{data=models.ClassPlacement}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      404  {object}  utils.APIResponse
@@ -42,30 +42,44 @@ func (h *ClassPlacementHandler) PlaceStudent(c *gin.Context) {
 
 	placement, err := h.service.PlaceStudent(req)
 	if err != nil {
-		if errors.Is(err, services.ErrPlacementRegNotFound) || errors.Is(err, services.ErrPlacementClassNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+		if errors.Is(err, services.ErrPlacementRegNotFound) {
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "placement.reg_not_found", nil), nil)
 			return
 		}
-		if errors.Is(err, services.ErrPlacementPaymentRequired) ||
-			errors.Is(err, services.ErrPlacementCourseMismatch) ||
-			errors.Is(err, services.ErrPlacementClassClosed) {
-			utils.ErrorResponse(c, http.StatusBadRequest, err.Error(), nil)
+		if errors.Is(err, services.ErrPlacementClassNotFound) {
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "placement.class_not_found", nil), nil)
 			return
 		}
-		if errors.Is(err, services.ErrPlacementAlreadyAssigned) || errors.Is(err, services.ErrPlacementClassFull) {
-			utils.ErrorResponse(c, http.StatusConflict, err.Error(), nil)
+		if errors.Is(err, services.ErrPlacementPaymentRequired) {
+			utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "placement.payment_required", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal menempatkan siswa ke kelas", err.Error())
+		if errors.Is(err, services.ErrPlacementCourseMismatch) {
+			utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "placement.course_mismatch", nil), nil)
+			return
+		}
+		if errors.Is(err, services.ErrPlacementClassClosed) {
+			utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "placement.class_closed", nil), nil)
+			return
+		}
+		if errors.Is(err, services.ErrPlacementAlreadyAssigned) {
+			utils.ErrorResponse(c, http.StatusConflict, utils.Translate(c, "placement.already_assigned", nil), nil)
+			return
+		}
+		if errors.Is(err, services.ErrPlacementClassFull) {
+			utils.ErrorResponse(c, http.StatusConflict, utils.Translate(c, "placement.class_full", nil), nil)
+			return
+		}
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "placement.place_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusCreated, "Student berhasil ditempatkan ke dalam kelas 🎉", placement)
+	utils.SuccessResponse(c, http.StatusCreated, utils.Translate(c, "placement.placed_success", nil), placement)
 }
 
 // GetAll godoc
-// @Summary      Mengambil seluruh data penempatan kelas
-// @Description  Mengembalikan daftar penempatan siswa beserta relasi registration, student, course, dan class
+// @Summary      Get all class placements
+// @Description  Returns all class placement records along with registration, student, course, and class relations
 // @Tags         Class Placements
 // @Produce      json
 // @Success      200  {object}  utils.APIResponse{data=[]models.ClassPlacement}
@@ -74,16 +88,16 @@ func (h *ClassPlacementHandler) PlaceStudent(c *gin.Context) {
 func (h *ClassPlacementHandler) GetAll(c *gin.Context) {
 	placements, err := h.service.GetAll()
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar penempatan kelas", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "placement.fetch_all_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar penempatan kelas berhasil diambil", placements)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "placement.fetched_all", nil), placements)
 }
 
 // GetByID godoc
-// @Summary      Mengambil detail penempatan kelas
-// @Description  Mengembalikan data spesifik penempatan kelas berdasarkan ID
+// @Summary      Get class placement detail
+// @Description  Returns detail of a specific class placement by ID
 // @Tags         Class Placements
 // @Produce      json
 // @Param        id   path      int  true  "Placement ID"
@@ -96,19 +110,19 @@ func (h *ClassPlacementHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID penempatan tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "placement.invalid_id", nil), nil)
 		return
 	}
 
 	placement, err := h.service.GetByID(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrPlacementNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "placement.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil detail penempatan", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "placement.fetch_detail_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Detail penempatan kelas berhasil diambil", placement)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "placement.fetched_detail", nil), placement)
 }

@@ -20,12 +20,12 @@ func NewStudentHandler(service services.StudentService) *StudentHandler {
 }
 
 // Create godoc
-// @Summary      Mendaftarkan student baru
-// @Description  Membuat data peserta kursus baru dengan validasi email unik
+// @Summary      Register a new student
+// @Description  Creates a new student profile with unique email validation
 // @Tags         Students
 // @Accept       json
 // @Produce      json
-// @Param        request body services.CreateStudentRequest true "Payload pendaftaran student"
+// @Param        request body services.CreateStudentRequest true "Student registration payload"
 // @Success      201  {object}  utils.APIResponse{data=models.Student}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      409  {object}  utils.APIResponse
@@ -42,19 +42,19 @@ func (h *StudentHandler) Create(c *gin.Context) {
 	student, err := h.service.Create(req)
 	if err != nil {
 		if errors.Is(err, services.ErrStudentEmailConflict) {
-			utils.ErrorResponse(c, http.StatusConflict, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusConflict, utils.Translate(c, "student.email_conflict", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal membuat data student", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "student.create_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusCreated, "Student berhasil dibuat", student)
+	utils.SuccessResponse(c, http.StatusCreated, utils.Translate(c, "student.created", nil), student)
 }
 
 // GetAll godoc
-// @Summary      Mengambil daftar seluruh student
-// @Description  Mengembalikan daftar semua peserta kursus yang terdaftar
+// @Summary      Get all students
+// @Description  Returns a list of all registered students
 // @Tags         Students
 // @Produce      json
 // @Success      200  {object}  utils.APIResponse{data=[]models.Student}
@@ -63,16 +63,16 @@ func (h *StudentHandler) Create(c *gin.Context) {
 func (h *StudentHandler) GetAll(c *gin.Context) {
 	students, err := h.service.GetAll()
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar student", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "student.fetch_all_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar student berhasil diambil", students)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "student.fetched_all", nil), students)
 }
 
 // GetByID godoc
-// @Summary      Mengambil detail profil student
-// @Description  Mengembalikan data detail student berdasarkan ID
+// @Summary      Get student profile detail
+// @Description  Returns detail of a student by ID
 // @Tags         Students
 // @Produce      json
 // @Param        id   path      int  true  "Student ID"
@@ -85,31 +85,31 @@ func (h *StudentHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID student tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "student.invalid_id", nil), nil)
 		return
 	}
 
 	student, err := h.service.GetByID(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrStudentNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "student.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil detail student", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "student.fetch_detail_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Detail student berhasil diambil", student)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "student.fetched_detail", nil), student)
 }
 
 // Update godoc
-// @Summary      Mengubah data profil student
-// @Description  Memperbarui nama, email, atau no telepon student
+// @Summary      Update student profile
+// @Description  Updates name, email, or phone number of a student
 // @Tags         Students
 // @Accept       json
 // @Produce      json
 // @Param        id       path      int                          true  "Student ID"
-// @Param        request  body      services.UpdateStudentRequest true  "Payload update student"
+// @Param        request  body      services.UpdateStudentRequest true  "Update student payload"
 // @Success      200  {object}  utils.APIResponse{data=models.Student}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      404  {object}  utils.APIResponse
@@ -121,7 +121,7 @@ func (h *StudentHandler) Update(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID student tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "student.invalid_id", nil), nil)
 		return
 	}
 
@@ -134,23 +134,23 @@ func (h *StudentHandler) Update(c *gin.Context) {
 	student, err := h.service.Update(uint(id), req)
 	if err != nil {
 		if errors.Is(err, services.ErrStudentNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "student.not_found", nil), nil)
 			return
 		}
 		if errors.Is(err, services.ErrStudentEmailConflict) {
-			utils.ErrorResponse(c, http.StatusConflict, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusConflict, utils.Translate(c, "student.email_conflict", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal memperbarui data student", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "student.update_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Data student berhasil diperbarui", student)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "student.updated", nil), student)
 }
 
 // Delete godoc
-// @Summary      Menghapus data student
-// @Description  Menghapus data student berdasarkan ID
+// @Summary      Delete student data
+// @Description  Deletes student data by ID
 // @Tags         Students
 // @Produce      json
 // @Param        id   path      int  true  "Student ID"
@@ -163,19 +163,19 @@ func (h *StudentHandler) Delete(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID student tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "student.invalid_id", nil), nil)
 		return
 	}
 
 	err = h.service.Delete(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrStudentNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "student.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal menghapus data student", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "student.delete_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Data student berhasil dihapus", nil)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "student.deleted", nil), nil)
 }

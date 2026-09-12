@@ -9,12 +9,12 @@ import (
 )
 
 var (
-	ErrRegistrationNotFound         = errors.New("data registrasi tidak ditemukan")
-	ErrRegistrationStudentNotFound  = errors.New("student tidak ditemukan")
-	ErrRegistrationCourseNotFound   = errors.New("course tidak ditemukan")
-	ErrRegistrationCourseInactive   = errors.New("course sedang tidak aktif")
-	ErrRegistrationAlreadyActive    = errors.New("student masih memiliki pendaftaran aktif untuk course ini")
-	ErrRegistrationCannotBeCanceled = errors.New("registrasi tidak dapat dibatalkan pada status saat ini")
+	ErrRegistrationNotFound         = errors.New("registration data not found")
+	ErrRegistrationStudentNotFound  = errors.New("student not found")
+	ErrRegistrationCourseNotFound   = errors.New("course not found")
+	ErrRegistrationCourseInactive   = errors.New("course is currently inactive")
+	ErrRegistrationAlreadyActive    = errors.New("student already has an active registration for this course")
+	ErrRegistrationCannotBeCanceled = errors.New("registration cannot be cancelled in its current status")
 )
 
 type CreateRegistrationRequest struct {

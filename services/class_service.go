@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	ErrClassNotFound       = errors.New("data class tidak ditemukan")
-	ErrClassCourseNotFound = errors.New("course yang direferensikan tidak ditemukan")
+	ErrClassNotFound       = errors.New("class data not found")
+	ErrClassCourseNotFound = errors.New("referenced course not found")
 )
 
 // Request DTOs

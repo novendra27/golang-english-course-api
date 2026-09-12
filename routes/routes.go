@@ -30,10 +30,11 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	// 1. Middleware Global
 	r.Use(gin.Recovery())
 	r.Use(middleware.HTTPLogger())
+	r.Use(middleware.I18nMiddleware())
 
 	// 2. Health Check Endpoint
 	r.GET("/health", func(c *gin.Context) {
-		utils.SuccessResponse(c, http.StatusOK, "Service is healthy 🚀", gin.H{
+		utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "system.healthy", nil), gin.H{
 			"app_name": cfg.App.Name,
 			"env":      cfg.App.Env,
 			"status":   "UP",
@@ -71,7 +72,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	apiV1 := r.Group("/api/v1")
 	{
 		apiV1.GET("/health", func(c *gin.Context) {
-			utils.SuccessResponse(c, http.StatusOK, "API v1 is healthy 🚀", gin.H{
+			utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "system.api_v1_healthy", nil), gin.H{
 				"version": "v1",
 				"status":  "UP",
 			})

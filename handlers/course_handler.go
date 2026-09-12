@@ -20,12 +20,12 @@ func NewCourseHandler(service services.CourseService) *CourseHandler {
 }
 
 // Create godoc
-// @Summary      Membuat katalog course baru
-// @Description  Menambahkan paket kursus baru beserta harga dan durasi
+// @Summary      Create a new course
+// @Description  Creates a new course catalog package with price and duration
 // @Tags         Courses
 // @Accept       json
 // @Produce      json
-// @Param        request body services.CreateCourseRequest true "Payload data course"
+// @Param        request body services.CreateCourseRequest true "Course creation payload"
 // @Success      201  {object}  utils.APIResponse{data=models.Course}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      422  {object}  utils.APIResponse
@@ -40,16 +40,16 @@ func (h *CourseHandler) Create(c *gin.Context) {
 
 	course, err := h.service.Create(req)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal membuat data course", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "course.create_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusCreated, "Course berhasil dibuat", course)
+	utils.SuccessResponse(c, http.StatusCreated, utils.Translate(c, "course.created", nil), course)
 }
 
 // GetAll godoc
-// @Summary      Mengambil daftar seluruh course
-// @Description  Mengembalikan katalog semua kursus bahasa Inggris yang tersedia
+// @Summary      Get all courses
+// @Description  Returns a catalog of all available English courses
 // @Tags         Courses
 // @Produce      json
 // @Success      200  {object}  utils.APIResponse{data=[]models.Course}
@@ -58,16 +58,16 @@ func (h *CourseHandler) Create(c *gin.Context) {
 func (h *CourseHandler) GetAll(c *gin.Context) {
 	courses, err := h.service.GetAll()
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar course", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "course.fetch_all_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar course berhasil diambil", courses)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "course.fetched_all", nil), courses)
 }
 
 // GetByID godoc
-// @Summary      Mengambil detail course beserta daftar kelasnya
-// @Description  Mengembalikan detail spesifik course beserta kelas yang dibuka di bawahnya
+// @Summary      Get course detail with classes
+// @Description  Returns detail of a specific course along with open classes under it
 // @Tags         Courses
 // @Produce      json
 // @Param        id   path      int  true  "Course ID"
@@ -80,31 +80,31 @@ func (h *CourseHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID course tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "course.invalid_id", nil), nil)
 		return
 	}
 
 	course, err := h.service.GetByID(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrCourseNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "course.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil detail course", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "course.fetch_detail_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Detail course berhasil diambil", course)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "course.fetched_detail", nil), course)
 }
 
 // Update godoc
-// @Summary      Mengubah data course
-// @Description  Memperbarui nama, deskripsi, harga, durasi, atau status course
+// @Summary      Update course data
+// @Description  Updates name, description, price, duration, or status of a course
 // @Tags         Courses
 // @Accept       json
 // @Produce      json
 // @Param        id       path      int                         true  "Course ID"
-// @Param        request  body      services.UpdateCourseRequest true  "Payload update course"
+// @Param        request  body      services.UpdateCourseRequest true  "Update course payload"
 // @Success      200  {object}  utils.APIResponse{data=models.Course}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      404  {object}  utils.APIResponse
@@ -115,7 +115,7 @@ func (h *CourseHandler) Update(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID course tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "course.invalid_id", nil), nil)
 		return
 	}
 
@@ -128,19 +128,19 @@ func (h *CourseHandler) Update(c *gin.Context) {
 	course, err := h.service.Update(uint(id), req)
 	if err != nil {
 		if errors.Is(err, services.ErrCourseNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "course.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal memperbarui data course", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "course.update_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Data course berhasil diperbarui", course)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "course.updated", nil), course)
 }
 
 // Delete godoc
-// @Summary      Menghapus data course
-// @Description  Menghapus course berdasarkan ID
+// @Summary      Delete course data
+// @Description  Deletes a course by ID
 // @Tags         Courses
 // @Produce      json
 // @Param        id   path      int  true  "Course ID"
@@ -153,19 +153,19 @@ func (h *CourseHandler) Delete(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID course tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "course.invalid_id", nil), nil)
 		return
 	}
 
 	err = h.service.Delete(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrCourseNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "course.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal menghapus data course", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "course.delete_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Data course berhasil dihapus", nil)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "course.deleted", nil), nil)
 }

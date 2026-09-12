@@ -20,12 +20,12 @@ func NewClassHandler(service services.ClassService) *ClassHandler {
 }
 
 // Create godoc
-// @Summary      Membuat kelas baru di bawah course
-// @Description  Membuka kelas baru dengan jadwal dan kapasitas tertentu
+// @Summary      Create a new class
+// @Description  Opens a new class under a course with schedule and capacity
 // @Tags         Classes
 // @Accept       json
 // @Produce      json
-// @Param        request body services.CreateClassRequest true "Payload data kelas"
+// @Param        request body services.CreateClassRequest true "Class creation payload"
 // @Success      201  {object}  utils.APIResponse{data=models.Class}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      404  {object}  utils.APIResponse
@@ -42,19 +42,19 @@ func (h *ClassHandler) Create(c *gin.Context) {
 	class, err := h.service.Create(req)
 	if err != nil {
 		if errors.Is(err, services.ErrClassCourseNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "class.course_not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal membuat data class", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "class.create_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusCreated, "Class berhasil dibuat", class)
+	utils.SuccessResponse(c, http.StatusCreated, utils.Translate(c, "class.created", nil), class)
 }
 
 // GetAll godoc
-// @Summary      Mengambil daftar seluruh kelas
-// @Description  Mengembalikan seluruh kelas beserta data Course-nya
+// @Summary      Get all classes
+// @Description  Returns all classes along with their Course data
 // @Tags         Classes
 // @Produce      json
 // @Success      200  {object}  utils.APIResponse{data=[]models.Class}
@@ -63,16 +63,16 @@ func (h *ClassHandler) Create(c *gin.Context) {
 func (h *ClassHandler) GetAll(c *gin.Context) {
 	classes, err := h.service.GetAll()
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar class", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "class.fetch_all_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar class berhasil diambil", classes)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "class.fetched_all", nil), classes)
 }
 
 // GetByID godoc
-// @Summary      Mengambil detail kelas
-// @Description  Mengembalikan data spesifik kelas berdasarkan ID
+// @Summary      Get class detail
+// @Description  Returns detail of a specific class by ID
 // @Tags         Classes
 // @Produce      json
 // @Param        id   path      int  true  "Class ID"
@@ -85,31 +85,31 @@ func (h *ClassHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID class tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "class.invalid_id", nil), nil)
 		return
 	}
 
 	class, err := h.service.GetByID(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrClassNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "class.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil detail class", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "class.fetch_detail_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Detail class berhasil diambil", class)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "class.fetched_detail", nil), class)
 }
 
 // Update godoc
-// @Summary      Mengubah data kelas
-// @Description  Memperbarui nama, kapasitas, jadwal, atau status kelas
+// @Summary      Update class data
+// @Description  Updates name, capacity, schedule, or status of a class
 // @Tags         Classes
 // @Accept       json
 // @Produce      json
 // @Param        id       path      int                        true  "Class ID"
-// @Param        request  body      services.UpdateClassRequest true  "Payload update class"
+// @Param        request  body      services.UpdateClassRequest true  "Update class payload"
 // @Success      200  {object}  utils.APIResponse{data=models.Class}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      404  {object}  utils.APIResponse
@@ -120,7 +120,7 @@ func (h *ClassHandler) Update(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID class tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "class.invalid_id", nil), nil)
 		return
 	}
 
@@ -133,23 +133,23 @@ func (h *ClassHandler) Update(c *gin.Context) {
 	class, err := h.service.Update(uint(id), req)
 	if err != nil {
 		if errors.Is(err, services.ErrClassNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "class.not_found", nil), nil)
 			return
 		}
 		if errors.Is(err, services.ErrClassCourseNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "class.course_not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal memperbarui data class", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "class.update_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Data class berhasil diperbarui", class)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "class.updated", nil), class)
 }
 
 // Delete godoc
-// @Summary      Menghapus data kelas
-// @Description  Menghapus kelas berdasarkan ID
+// @Summary      Delete class data
+// @Description  Deletes a class by ID
 // @Tags         Classes
 // @Produce      json
 // @Param        id   path      int  true  "Class ID"
@@ -162,26 +162,26 @@ func (h *ClassHandler) Delete(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID class tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "class.invalid_id", nil), nil)
 		return
 	}
 
 	err = h.service.Delete(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrClassNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "class.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal menghapus data class", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "class.delete_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Data class berhasil dihapus", nil)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "class.deleted", nil), nil)
 }
 
 // GetStudents godoc
-// @Summary      Mengambil daftar siswa dalam kelas
-// @Description  Mengembalikan seluruh siswa yang telah ditempatkan di kelas ini
+// @Summary      Get students in a class
+// @Description  Returns all students who have been placed into this class
 // @Tags         Classes
 // @Produce      json
 // @Param        id   path      int  true  "Class ID"
@@ -194,19 +194,19 @@ func (h *ClassHandler) GetStudents(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID class tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "class.invalid_id", nil), nil)
 		return
 	}
 
 	students, err := h.service.GetStudents(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrClassNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "class.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar siswa di kelas", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "class.students_fetch_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar siswa dalam kelas berhasil diambil", students)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "class.students_fetched", nil), students)
 }

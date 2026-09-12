@@ -20,12 +20,12 @@ func NewRegistrationHandler(service services.RegistrationService) *RegistrationH
 }
 
 // Register godoc
-// @Summary      Mendaftar ke kursus (Registration)
-// @Description  Mendaftarkan siswa ke kursus dan secara otomatis membuat tagihan Payment pending
+// @Summary      Register to a course
+// @Description  Registers a student to a course and automatically generates a pending payment invoice
 // @Tags         Registrations
 // @Accept       json
 // @Produce      json
-// @Param        request body services.CreateRegistrationRequest true "Payload pendaftaran"
+// @Param        request body services.CreateRegistrationRequest true "Registration payload"
 // @Success      201  {object}  utils.APIResponse{data=models.Registration}
 // @Failure      400  {object}  utils.APIResponse
 // @Failure      404  {object}  utils.APIResponse
@@ -42,28 +42,32 @@ func (h *RegistrationHandler) Register(c *gin.Context) {
 
 	registration, err := h.service.Register(req)
 	if err != nil {
-		if errors.Is(err, services.ErrRegistrationStudentNotFound) || errors.Is(err, services.ErrRegistrationCourseNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+		if errors.Is(err, services.ErrRegistrationStudentNotFound) {
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "registration.student_not_found", nil), nil)
+			return
+		}
+		if errors.Is(err, services.ErrRegistrationCourseNotFound) {
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "registration.course_not_found", nil), nil)
 			return
 		}
 		if errors.Is(err, services.ErrRegistrationCourseInactive) {
-			utils.ErrorResponse(c, http.StatusBadRequest, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "registration.course_inactive", nil), nil)
 			return
 		}
 		if errors.Is(err, services.ErrRegistrationAlreadyActive) {
-			utils.ErrorResponse(c, http.StatusConflict, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusConflict, utils.Translate(c, "registration.already_active", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal membuat registrasi", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "registration.create_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusCreated, "Pendaftaran kursus berhasil dibuat", registration)
+	utils.SuccessResponse(c, http.StatusCreated, utils.Translate(c, "registration.created", nil), registration)
 }
 
 // GetAll godoc
-// @Summary      Mengambil daftar seluruh pendaftaran
-// @Description  Mengembalikan semua data registrasi beserta relasi student, course, dan payment
+// @Summary      Get all registrations
+// @Description  Returns all registration records along with student, course, and payment relations
 // @Tags         Registrations
 // @Produce      json
 // @Success      200  {object}  utils.APIResponse{data=[]models.Registration}
@@ -72,16 +76,16 @@ func (h *RegistrationHandler) Register(c *gin.Context) {
 func (h *RegistrationHandler) GetAll(c *gin.Context) {
 	registrations, err := h.service.GetAll()
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar pendaftaran", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "registration.fetch_all_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar pendaftaran berhasil diambil", registrations)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "registration.fetched_all", nil), registrations)
 }
 
 // GetByID godoc
-// @Summary      Mengambil detail pendaftaran
-// @Description  Mengembalikan detail registrasi berdasarkan ID
+// @Summary      Get registration detail
+// @Description  Returns detail of a registration by ID
 // @Tags         Registrations
 // @Produce      json
 // @Param        id   path      int  true  "Registration ID"
@@ -94,26 +98,26 @@ func (h *RegistrationHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID pendaftaran tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "registration.invalid_id", nil), nil)
 		return
 	}
 
 	reg, err := h.service.GetByID(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrRegistrationNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "registration.not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil detail pendaftaran", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "registration.fetch_detail_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Detail pendaftaran berhasil diambil", reg)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "registration.fetched_detail", nil), reg)
 }
 
 // GetByStudentID godoc
-// @Summary      Mengambil riwayat pendaftaran student
-// @Description  Mengembalikan daftar kursus yang didaftarkan oleh student tertentu
+// @Summary      Get student registration history
+// @Description  Returns all registrations made by a specific student
 // @Tags         Students
 // @Produce      json
 // @Param        id   path      int  true  "Student ID"
@@ -126,26 +130,26 @@ func (h *RegistrationHandler) GetByStudentID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID student tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "registration.invalid_student_id", nil), nil)
 		return
 	}
 
 	regs, err := h.service.GetByStudentID(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrRegistrationStudentNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "registration.student_not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar pendaftaran student", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "registration.student_regs_fetch_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar pendaftaran student berhasil diambil", regs)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "registration.student_regs_fetched", nil), regs)
 }
 
 // GetByCourseID godoc
-// @Summary      Mengambil daftar pendaftaran pada course
-// @Description  Mengembalikan semua siswa yang terdaftar di course tertentu
+// @Summary      Get registrations for a course
+// @Description  Returns all students registered for a specific course
 // @Tags         Courses
 // @Produce      json
 // @Param        id   path      int  true  "Course ID"
@@ -158,26 +162,26 @@ func (h *RegistrationHandler) GetByCourseID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID course tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "registration.invalid_course_id", nil), nil)
 		return
 	}
 
 	regs, err := h.service.GetByCourseID(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrRegistrationCourseNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "registration.course_not_found", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal mengambil daftar pendaftaran course", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "registration.course_regs_fetch_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Daftar pendaftaran course berhasil diambil", regs)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "registration.course_regs_fetched", nil), regs)
 }
 
 // CancelRegistration godoc
-// @Summary      Membatalkan pendaftaran
-// @Description  Mengubah status registrasi menjadi cancelled jika belum selesai
+// @Summary      Cancel a registration
+// @Description  Updates registration status to cancelled if not yet completed
 // @Tags         Registrations
 // @Produce      json
 // @Param        id   path      int  true  "Registration ID"
@@ -190,23 +194,23 @@ func (h *RegistrationHandler) CancelRegistration(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "ID pendaftaran tidak valid", nil)
+		utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "registration.invalid_id", nil), nil)
 		return
 	}
 
 	err = h.service.CancelRegistration(uint(id))
 	if err != nil {
 		if errors.Is(err, services.ErrRegistrationNotFound) {
-			utils.ErrorResponse(c, http.StatusNotFound, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusNotFound, utils.Translate(c, "registration.not_found", nil), nil)
 			return
 		}
 		if errors.Is(err, services.ErrRegistrationCannotBeCanceled) {
-			utils.ErrorResponse(c, http.StatusBadRequest, err.Error(), nil)
+			utils.ErrorResponse(c, http.StatusBadRequest, utils.Translate(c, "registration.cannot_cancel", nil), nil)
 			return
 		}
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Gagal membatalkan pendaftaran", err.Error())
+		utils.ErrorResponse(c, http.StatusInternalServerError, utils.Translate(c, "registration.cancel_failed", nil), err.Error())
 		return
 	}
 
-	utils.SuccessResponse(c, http.StatusOK, "Pendaftaran berhasil dibatalkan", nil)
+	utils.SuccessResponse(c, http.StatusOK, utils.Translate(c, "registration.cancelled", nil), nil)
 }

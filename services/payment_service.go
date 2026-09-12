@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	ErrPaymentNotFound      = errors.New("data payment tidak ditemukan")
-	ErrPaymentAlreadyPaid   = errors.New("pembayaran sudah berstatus lunas (paid)")
-	ErrPaymentInvalidStatus = errors.New("status pembayaran tidak valid untuk diproses")
-	ErrPaymentAmountInvalid = errors.New("jumlah pembayaran tidak sesuai dengan tagihan")
+	ErrPaymentNotFound      = errors.New("payment data not found")
+	ErrPaymentAlreadyPaid   = errors.New("payment has already been settled")
+	ErrPaymentInvalidStatus = errors.New("payment status is invalid for processing")
+	ErrPaymentAmountInvalid = errors.New("payment amount does not match the invoice amount")
 )
 
 type ProcessPaymentRequest struct {

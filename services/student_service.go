@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	ErrStudentNotFound      = errors.New("data student tidak ditemukan")
-	ErrStudentEmailConflict = errors.New("email student sudah digunakan")
+	ErrStudentNotFound      = errors.New("student data not found")
+	ErrStudentEmailConflict = errors.New("student email is already in use")
 )
 
 // Request DTOs

@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrCourseNotFound = errors.New("data course tidak ditemukan")
+	ErrCourseNotFound = errors.New("course data not found")
 )
 
 // Request DTOs

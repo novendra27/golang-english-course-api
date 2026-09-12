@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	ErrPlacementNotFound        = errors.New("data penempatan kelas tidak ditemukan")
-	ErrPlacementRegNotFound     = errors.New("data registrasi tidak ditemukan")
-	ErrPlacementClassNotFound   = errors.New("data kelas tidak ditemukan")
-	ErrPlacementPaymentRequired = errors.New("student belum menyelesaikan pembayaran (status registrasi belum 'registered' / payment belum 'paid')")
-	ErrPlacementCourseMismatch  = errors.New("kelas yang dipilih tidak sesuai dengan course yang didaftarkan")
-	ErrPlacementAlreadyAssigned = errors.New("registrasi ini sudah pernah ditempatkan ke dalam kelas")
-	ErrPlacementClassFull       = errors.New("kapasitas kelas sudah penuh")
-	ErrPlacementClassClosed     = errors.New("kelas sedang ditutup untuk penempatan baru")
+	ErrPlacementNotFound        = errors.New("class placement data not found")
+	ErrPlacementRegNotFound     = errors.New("registration data not found")
+	ErrPlacementClassNotFound   = errors.New("class data not found")
+	ErrPlacementPaymentRequired = errors.New("student has not completed payment (registration status must be 'registered' / payment must be 'paid')")
+	ErrPlacementCourseMismatch  = errors.New("selected class does not match the registered course")
+	ErrPlacementAlreadyAssigned = errors.New("registration is already assigned to a class")
+	ErrPlacementClassFull       = errors.New("class capacity is full")
+	ErrPlacementClassClosed     = errors.New("class is closed for new placements")
 )
 
 type CreateClassPlacementRequest struct {
